@@ -113,15 +113,33 @@ const ConcertLayout = () => {
                     )
                   ),
 
-                  m("div", { class: "w-full max-w-4xl mx-auto" },
+m("div", { class: "w-full max-w-4xl mx-auto" },
                     m("h2", { class: "text-2xl font-semibold text-white mb-8" }, "Highlight Perjalanan"),
-                    m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
+m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
                       [
                         { title: "Total Gigs", value: "15+", desc: "Konser & Festival" },
                         { title: "Koleksi", value: "300+", desc: "Foto & Video Memori" },
                         { title: "Solidaritas", value: "100%", desc: "Selalu Sing-along" }
-                      ].map(stat => 
-                        m("div", { class: "bg-slate-800/30 border border-slate-700/50 rounded-xl p-8 flex flex-col items-center justify-center hover:bg-slate-800/60 transition-colors" },
+                      ].map((stat, index) => 
+                        m("div", { 
+                          class: "bg-slate-800/30 border border-slate-700/50 rounded-xl p-8 flex flex-col items-center justify-center transition-all duration-700 ease-out transform translate-y-12 opacity-0 hover:bg-slate-800/70 hover:border-indigo-500/50 hover:shadow-[0_0_25px_rgba(99,102,241,0.25)] hover:-translate-y-2 cursor-default",
+                          
+                          // Hook Mithril dengan Sensor Scroll (Intersection Observer)
+                          oncreate: (vnode) => {
+                            const observer = new IntersectionObserver((entries) => {
+                              if (entries[0].isIntersecting) {
+                                setTimeout(() => {
+                                  vnode.dom.classList.remove("translate-y-12", "opacity-0");
+                                  vnode.dom.classList.add("translate-y-0", "opacity-100");
+                                }, index * 250 + 100); 
+                                
+                                observer.unobserve(vnode.dom);
+                              }
+                            }, { threshold: 0.2 });
+
+                            observer.observe(vnode.dom);
+                          }
+                        },
                           m("h3", { class: "text-4xl font-bold text-indigo-400 mb-2" }, stat.value),
                           m("p", { class: "text-slate-300 font-medium text-lg" }, stat.title),
                           m("p", { class: "text-slate-500 text-sm mt-2" }, stat.desc)
@@ -145,8 +163,22 @@ const ConcertLayout = () => {
                         onclick: () => { isOpen = true; }
                       }, "Buka Dokumentasi")
                     : 
-                      m("div", { class: "mt-8 animate-[bounce_0.5s_ease-out_1] transform transition-all duration-500" },
-                        m("h2", { class: "text-xl font-semibold text-slate-300 mb-6 border-b border-slate-600 inline-block pb-2" }, "Arsip Foto"),
+                      m("div", { class: "mt-8 animate-[fadeIn_0.5s_ease-out_1]" },
+                        
+                        // KODE BARU: Animasi meluncur dari samping (kiri) untuk teks "Arsip Foto"
+                        m("h2", { 
+                          // Awal Mula: Sembunyi (opacity-0) dan geser ke kiri (-translate-x-12)
+                          class: "text-xl font-semibold text-slate-300 mb-6 border-b border-slate-600 inline-block pb-2 opacity-0 -translate-x-12 transition-all duration-700 ease-out",
+                          
+                          // Perintah untuk memunculkan dan menggeser teks ke posisi normal (translate-x-0)
+                          oncreate: (vnode) => {
+                            setTimeout(() => {
+                              vnode.dom.classList.remove("opacity-0", "-translate-x-12");
+                              vnode.dom.classList.add("opacity-100", "translate-x-0");
+                            }, 50); // Jeda sangat singkat (50ms) agar animasinya langsung jalan saat diklik
+                          }
+                        }, "Arsip Foto"),
+
                         m(PhotoGrid, { images: activeConcert.gallery })
                       )
                   )

@@ -53,8 +53,8 @@ const ConcertState = {
       ]
     },
     { 
-      id: "mantra in summer", 
-      shortTitle: "mantra in summer 26", 
+      id: "Mantra In Summer", 
+      shortTitle: "Mantra In Summer 26", 
       title: "Mantra in summer", 
       desc: "Tiga hari capek tapi seru banget keliling panggung dan moshpit.", 
       gallery: [ 
