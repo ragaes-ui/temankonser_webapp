@@ -20,7 +20,7 @@ const ConcertState = {
   list: [
     { 
       id: "pbb-bogor", 
-      shortTitle: "PBB Bogor", // <-- NAMA PENDEK UNTUK NAVBAR
+      shortTitle: "PBB Bogor 2026", // <-- NAMA PENDEK UNTUK NAVBAR
       title: "Pesta Bebas Berselancar (Stadion Pakansari Bogor)", // <-- NAMA PANJANG UNTUK HALAMAN
       desc: "Seru-seruan di Pakansari, pecah banget!", 
       gallery: [ 
