@@ -43,7 +43,7 @@ const ConcertState = {
         {
       id: "Comafest",
       shortTitle: "Comafest 2026",
-      title: "ComaFest Plaza Parkir Barat GBK",
+      title: "ComaFest Plaza Parkir Timur GBK",
       desc: "Seru Seruan Bareng di comefest, singalong bareng bareng dan surving seru seruan.",
       gallery: [ 
         "https://drive.google.com/file/d/1N9MUmpczRcjhCLVUTK9gN8EKyiMEkm4X/view?usp=sharing",
