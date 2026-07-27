@@ -218,7 +218,7 @@ m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
             ),
             
             // Teks Hak Cipta
-            m("p", { class: "text-slate-500 text-sm" }, "© 2026 Teman Konser.fest. Dibuat untuk memori tanpa batas.")
+            m("p", { class: "text-slate-500 text-sm" }, "© 2026 TemanKonser.fest. Dibuat untuk memori tanpa batas.")
           )
         )
         // --- AKHIR FOOTER ---
