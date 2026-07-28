@@ -132,10 +132,7 @@ const ConcertState = {
         "https://drive.google.com/file/d/1a-PBYxYfl0Q_gW02xHE_4EON2kn8gIXz/view?usp=sharing",
         "https://drive.google.com/file/d/1AuSaBgCmzJwfeJRkZRNiEv6GeqTzZ2VO/view?usp=sharing",
         "https://drive.google.com/file/d/1yiTkds04SmixtONgWLH2LnXnqcfkfg_z/view?usp=sharing",
-        "https://drive.google.com/file/d/1zvlOTMWsbZcS93Gejf2Gfmypt_vRedIl/view?usp=sharing"
-        
-     
-
+        "https://drive.google.com/file/d/1zvlOTMWsbZcS93Gejf2Gfmypt_vRedIl/view?usp=sharing"             
       ] 
 
     },
