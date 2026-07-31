@@ -5,9 +5,9 @@ import AdminLayout from "./views/AdminLayout.js";
 
 const appContainer = document.getElementById("app");
 
-// Menggunakan m.route untuk sistem pindah laman yang sesungguhnya
+// Perbaikan Rute: Daftarkan /home secara spesifik supaya tidak direbut oleh /:id
 m.route(appContainer, "/home", {
-  // RUTE ADMIN (Wajib di urutan paling atas)
+  "/home": ConcertLayout,
   "/admin/dashboard": AdminLayout,
   "/:id": ConcertLayout
 });
