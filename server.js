@@ -7,13 +7,28 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 1. Sambungkan ke MongoDB
-mongoose.connect("mongodb+srv://temankonser_db:raga151204@cluster0.xak7oyy.mongodb.net/temankonser_db?retryWrites=true&w=majority")
-  .then(() => {
+// 1. KONEKSI MONGODB YANG AMAN UNTuk VERCEL SERVERLESS
+let isConnected = false;
+
+const connectDB = async () => {
+  if (isConnected) return;
+  try {
+    await mongoose.connect("mongodb+srv://temankonser_db:raga151204@cluster0.xak7oyy.mongodb.net/temankonser_db?retryWrites=true&w=majority", {
+      serverSelectionTimeoutMS: 5000 // Batas waktu koneksi agar tidak gantung
+    });
+    isConnected = true;
     console.log("MongoDB Terhubung! 🎉");
-    buatAkunAdminPertama(); // Panggil fungsi pembuat admin saat DB konek
-  })
-  .catch(err => console.log("Yah, gagal terhubung:", err));
+    await buatAkunAdminPertama();
+  } catch (err) {
+    console.log("Yah, gagal terhubung:", err);
+  }
+};
+
+// Middleware agar setiap ada request API, database dipastikan connect dulu
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 
 
 // ==========================================
