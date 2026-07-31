@@ -95,10 +95,11 @@ const ConcertLayout = () => {
       }
     },
 
-    view: () => {
+view: () => {
       
       const currentId = m.route.param("id");
-      const activeConcert = ConcertState.list.find(c => c.id === currentId);
+      // KODE DIPERBAIKI: Tambahkan tanda "?" sebelum ".find"
+      const activeConcert = ConcertState.list?.find(c => c.id === currentId);
       
       // Mengecek apakah konser ini punya data video
       const hasVideos = activeConcert && activeConcert.videos && activeConcert.videos.length > 0;
