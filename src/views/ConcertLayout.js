@@ -7,6 +7,9 @@ const ConcertLayout = () => {
   let isLoading = false;
   let previousId = null;
   let isOpen = false;
+  
+  // KODE BARU: State untuk menentukan mana yang sedang aktif ("foto" atau "video")
+  let activeTab = "foto"; 
 
   // --- STATE UNTUK ANIMASI KETIK (TYPEWRITER) ---
   const words = ["Teman Konser Festival", "Ruang Arsip Digital", "Memori Area Moshpit"];
@@ -16,6 +19,11 @@ const ConcertLayout = () => {
   let typeTimer = null;
 
   const runTypewriter = () => {
+    if (m.route.param("id") !== "home") {
+      typeTimer = setTimeout(runTypewriter, 1000); 
+      return; 
+    }
+
     const i = loopNum % words.length;
     const fullText = words[i];
 
@@ -62,6 +70,7 @@ const ConcertLayout = () => {
       if (currentId !== previousId) {
         previousId = currentId;
         isOpen = false; 
+        activeTab = "foto"; // Reset tab ke foto setiap pindah halaman konser
         isLoading = true;
         m.redraw();
         
@@ -75,12 +84,13 @@ const ConcertLayout = () => {
     view: () => {
       const currentId = m.route.param("id");
       const activeConcert = ConcertState.list.find(c => c.id === currentId);
+      
+      // Mengecek apakah konser ini punya data video
+      const hasVideos = activeConcert && activeConcert.videos && activeConcert.videos.length > 0;
 
-      // KODE BARU: Ditambahkan "flex flex-col" pada div utama agar tata letaknya bisa didorong ke bawah
       return m("div", { class: "min-h-screen flex flex-col bg-slate-900 text-slate-200 font-sans", key: "layout" },
         m(Navbar),
         
-        // KODE BARU: Ditambahkan "flex-grow" agar konten utama mengisi ruang kosong dan mendorong footer ke bawah
         m("main", { class: "container mx-auto p-4 md:p-8 flex-grow" },
           
           isLoading ? 
@@ -113,9 +123,9 @@ const ConcertLayout = () => {
                     )
                   ),
 
-m("div", { class: "w-full max-w-4xl mx-auto" },
+                  m("div", { class: "w-full max-w-4xl mx-auto" },
                     m("h2", { class: "text-2xl font-semibold text-white mb-8" }, "Highlight Perjalanan"),
-m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
+                    m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
                       [
                         { title: "Total Gigs", value: "15+", desc: "Konser & Festival" },
                         { title: "Koleksi", value: "300+", desc: "Foto & Video Memori" },
@@ -123,8 +133,6 @@ m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
                       ].map((stat, index) => 
                         m("div", { 
                           class: "bg-slate-800/30 border border-slate-700/50 rounded-xl p-8 flex flex-col items-center justify-center transition-all duration-700 ease-out transform translate-y-12 opacity-0 hover:bg-slate-800/70 hover:border-indigo-500/50 hover:shadow-[0_0_25px_rgba(99,102,241,0.25)] hover:-translate-y-2 cursor-default",
-                          
-                          // Hook Mithril dengan Sensor Scroll (Intersection Observer)
                           oncreate: (vnode) => {
                             const observer = new IntersectionObserver((entries) => {
                               if (entries[0].isIntersecting) {
@@ -132,11 +140,9 @@ m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
                                   vnode.dom.classList.remove("translate-y-12", "opacity-0");
                                   vnode.dom.classList.add("translate-y-0", "opacity-100");
                                 }, index * 250 + 100); 
-                                
                                 observer.unobserve(vnode.dom);
                               }
                             }, { threshold: 0.2 });
-
                             observer.observe(vnode.dom);
                           }
                         },
@@ -165,21 +171,70 @@ m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
                     : 
                       m("div", { class: "mt-8 animate-[fadeIn_0.5s_ease-out_1]" },
                         
-                        // KODE BARU: Animasi meluncur dari samping (kiri) untuk teks "Arsip Foto"
-                        m("h2", { 
-                          // Awal Mula: Sembunyi (opacity-0) dan geser ke kiri (-translate-x-12)
-                          class: "text-xl font-semibold text-slate-300 mb-6 border-b border-slate-600 inline-block pb-2 opacity-0 -translate-x-12 transition-all duration-700 ease-out",
+                        // KODE BARU: Tombol Tab Sejajar (Foto | Video)
+                        m("div", { class: "flex justify-center items-center gap-4 mb-10 border-b border-slate-700 pb-4" },
+                          m("button", {
+                            class: `px-6 py-2 rounded-full font-semibold transition-all duration-300 ${activeTab === 'foto' ? 'bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)]' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'}`,
+                            onclick: () => { activeTab = "foto"; }
+                          }, "📷 Arsip Foto"),
                           
-                          // Perintah untuk memunculkan dan menggeser teks ke posisi normal (translate-x-0)
-                          oncreate: (vnode) => {
-                            setTimeout(() => {
-                              vnode.dom.classList.remove("opacity-0", "-translate-x-12");
-                              vnode.dom.classList.add("opacity-100", "translate-x-0");
-                            }, 50); // Jeda sangat singkat (50ms) agar animasinya langsung jalan saat diklik
-                          }
-                        }, "Arsip Foto"),
+                          // Tombol video hanya muncul jika ada videonya
+                          hasVideos ? m("button", {
+                            class: `px-6 py-2 rounded-full font-semibold transition-all duration-300 ${activeTab === 'video' ? 'bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)]' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'}`,
+                            onclick: () => { activeTab = "video"; }
+                          }, "🎥 Arsip Video") : null
+                        ),
 
-                        m(PhotoGrid, { images: activeConcert.gallery })
+                        // KODE BARU: Area Konten yang berubah sesuai Tab yang diklik
+                        activeTab === "foto" ? 
+                          // TAMPILAN FOTO
+                          m("div", { class: "animate-[fadeIn_0.4s_ease-out_1]" },
+                            m(PhotoGrid, { images: activeConcert.gallery })
+                          )
+                        :
+// TAMPILAN VIDEO
+                          m("div", { class: "animate-[fadeIn_0.4s_ease-out_1]" },
+                            // Ubah grid menjadi lebih rapat dan fleksibel untuk video portrait
+                            m("div", { class: "flex flex-wrap justify-center gap-8" },
+                              // KODE DIPERBAIKI: Tambahkan ( || [] ) agar sistem tidak error saat videonya kosong
+                              (activeConcert.videos || []).map((vidUrl, index) => 
+                                m("div", { 
+                                  // Container dibuat seukuran layar HP
+                                  class: "w-full max-w-[320px] sm:max-w-[360px] bg-black/50 p-2 rounded-2xl shadow-lg border border-slate-700 opacity-0 transform translate-y-12 transition-all duration-1000 ease-out flex flex-col items-center justify-center",
+                                  oncreate: (vnode) => {
+                                    const observer = new IntersectionObserver((entries) => {
+                                      if (entries[0].isIntersecting) {
+                                        setTimeout(() => {
+                                          vnode.dom.classList.remove("opacity-0", "translate-y-12");
+                                          vnode.dom.classList.add("opacity-100", "translate-y-0");
+                                        }, index * 300); 
+                                        observer.unobserve(vnode.dom);
+                                      }
+                                    }, { threshold: 0.1 });
+                                    observer.observe(vnode.dom);
+                                  }
+                                },
+                                  vidUrl.includes("drive.google.com") ? 
+                                    // KODE DIPERBAIKI: Memaksa iframe Google Drive jadi Portrait (9:16)
+                                    m("iframe", {
+                                      src: vidUrl,
+                                      class: "w-full aspect-[9/16] rounded-xl", 
+                                      allowfullscreen: true,
+                                      loading: "lazy"
+                                    })
+                                  : 
+                                    // KODE DIPERBAIKI: Untuk video lokal
+                                    m("video", {
+                                      src: vidUrl,
+                                      class: "w-full aspect-[9/16] object-cover rounded-xl bg-black", 
+                                      controls: true,
+                                      preload: "metadata"
+                                    })
+                                )
+                              )
+                            )
+                          )
+
                       )
                   )
                 : 
@@ -188,28 +243,24 @@ m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
             )
         ),
 
-        // --- KODE BARU: FOOTER SOSIAL MEDIA ---
+        // --- FOOTER SOSIAL MEDIA ---
         m("footer", { class: "w-full bg-slate-950/50 border-t border-slate-800 py-8 mt-12 text-center" },
           m("div", { class: "container mx-auto" },
             m("h3", { class: "text-slate-400 font-medium mb-4" }, "Terkoneksi dengan Kami:"),
             
-            // Tempat Link Sosial Media
             m("div", { class: "flex justify-center items-center gap-6 mb-6" },
-              // Link 1 (Bisa diganti dengan link Instagram)
               m("a", { 
                 href: "https://www.instagram.com/temankonser.fest?igsh=MWFkeWJsbTc5dHRkcg%3D%3D", 
                 target: "_blank", 
                 class: "text-slate-300 hover:text-indigo-400 font-medium transition-colors" 
               }, "Instagram"),
               
-              // Link 2 (Bisa diganti dengan link X/Twitter atau komunitas)
               m("a", { 
                 href: "https://twitter.com/", 
                 target: "_blank", 
                 class: "text-slate-300 hover:text-indigo-400 font-medium transition-colors" 
               }, "Twitter"),
               
-              // Link 3 (Contoh link website ticketing / eksternal)
               m("a", { 
                 href: "https://www.tiktok.com/@temankonser.fest?_r=1&_t=ZS-98GYL88afNo", 
                 target: "_blank", 
@@ -217,11 +268,9 @@ m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
               }, "Tiktok")
             ),
             
-            // Teks Hak Cipta
             m("p", { class: "text-slate-500 text-sm" }, "© 2026 TemanKonser.fest. Created By ragaes-ui.")
           )
         )
-        // --- AKHIR FOOTER ---
 
       );
     }

@@ -155,7 +155,7 @@ const ConcertState = {
     {
       id: "foto-nongkrong",
       shortTitle: "Nongkrong",
-      title: "Foto Nongkrong",
+      title: "Dokumentasi Nongkrong",
       desc: "Kumpulan memori ngopi, diskusi, dan kumpul-kumpul santai bareng anak-anak.",
       gallery: [ 
         "https://drive.google.com/file/d/1utYNwtmuRfZLPU6eTXbqtDrC6WXdl6ST/view?usp=sharing",
@@ -189,8 +189,17 @@ const ConcertState = {
         "https://drive.google.com/file/d/1DYUjbQ1W_5UbcuCTGAOFLHz9dcV2ESjB/view?usp=sharing",
         "https://drive.google.com/file/d/1Ldh-kleLpbqHNUiVTFJJK37AY8WL9zUB/view?usp=sharing"
 
+      ],
+      // KODE BARU: Tambahkan array khusus video di sini
+      videos: [
+        
+        // Opsi 2: Jika terpaksa pakai Google Drive 
+        // (Pastikan link berakhiran /preview, BUKAN /view?usp=sharing)
+        "https://drive.google.com/file/d/1kAyi3NwhZ63rD4XPvjuXPEqBDdEu469g/preview",
+        "https://drive.google.com/file/d/1ZJc_KPj1grfE1D5b2Pp7R3vc0zpKIafn/preview"
       ]
     }
+    
   ],
   
   
