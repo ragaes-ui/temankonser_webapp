@@ -8,7 +8,7 @@ const ConcertLayout = () => {
   let previousId = null;
   let isOpen = false;
   
-  // KODE BARU: State untuk menentukan mana yang sedang aktif ("foto" atau "video")
+  // State untuk menentukan mana yang sedang aktif ("foto" atau "video")
   let activeTab = "foto"; 
 
   // --- STATE UNTUK ANIMASI KETIK (TYPEWRITER) ---
@@ -50,8 +50,18 @@ const ConcertLayout = () => {
   };
 
   return {
-    oninit: () => {
+    // KODE DIPERBAIKI: Tambahkan 'async' di sini
+    oninit: async () => {
+      // 1. Tarik data dari Database saat web pertama kali dibuka
+      if (ConcertState.list.length === 0) {
+        await ConcertState.loadConcerts();
+      }
+
       previousId = m.route.param("id");
+      
+      // 2. Set konser yang sedang aktif di state
+      ConcertState.setConcert(previousId);
+
       isLoading = true;
       setTimeout(() => {
         isLoading = false;
@@ -67,6 +77,10 @@ const ConcertLayout = () => {
 
     onupdate: () => {
       const currentId = m.route.param("id");
+      
+      // KODE DIPERBAIKI: Selalu update state konser yang aktif setiap pindah halaman
+      ConcertState.setConcert(currentId);
+
       if (currentId !== previousId) {
         previousId = currentId;
         isOpen = false; 
@@ -171,7 +185,7 @@ const ConcertLayout = () => {
                     : 
                       m("div", { class: "mt-8 animate-[fadeIn_0.5s_ease-out_1]" },
                         
-                        // KODE BARU: Tombol Tab Sejajar (Foto | Video)
+                        // Tombol Tab Sejajar (Foto | Video)
                         m("div", { class: "flex justify-center items-center gap-4 mb-10 border-b border-slate-700 pb-4" },
                           m("button", {
                             class: `px-6 py-2 rounded-full font-semibold transition-all duration-300 ${activeTab === 'foto' ? 'bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)]' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'}`,
@@ -185,21 +199,18 @@ const ConcertLayout = () => {
                           }, "🎥 Arsip Video") : null
                         ),
 
-                        // KODE BARU: Area Konten yang berubah sesuai Tab yang diklik
+                        // Area Konten
                         activeTab === "foto" ? 
                           // TAMPILAN FOTO
                           m("div", { class: "animate-[fadeIn_0.4s_ease-out_1]" },
                             m(PhotoGrid, { images: activeConcert.gallery })
                           )
                         :
-// TAMPILAN VIDEO
+                          // TAMPILAN VIDEO
                           m("div", { class: "animate-[fadeIn_0.4s_ease-out_1]" },
-                            // Ubah grid menjadi lebih rapat dan fleksibel untuk video portrait
                             m("div", { class: "flex flex-wrap justify-center gap-8" },
-                              // KODE DIPERBAIKI: Tambahkan ( || [] ) agar sistem tidak error saat videonya kosong
                               (activeConcert.videos || []).map((vidUrl, index) => 
                                 m("div", { 
-                                  // Container dibuat seukuran layar HP
                                   class: "w-full max-w-[320px] sm:max-w-[360px] bg-black/50 p-2 rounded-2xl shadow-lg border border-slate-700 opacity-0 transform translate-y-12 transition-all duration-1000 ease-out flex flex-col items-center justify-center",
                                   oncreate: (vnode) => {
                                     const observer = new IntersectionObserver((entries) => {
@@ -215,7 +226,6 @@ const ConcertLayout = () => {
                                   }
                                 },
                                   vidUrl.includes("drive.google.com") ? 
-                                    // KODE DIPERBAIKI: Memaksa iframe Google Drive jadi Portrait (9:16)
                                     m("iframe", {
                                       src: vidUrl,
                                       class: "w-full aspect-[9/16] rounded-xl", 
@@ -223,7 +233,6 @@ const ConcertLayout = () => {
                                       loading: "lazy"
                                     })
                                   : 
-                                    // KODE DIPERBAIKI: Untuk video lokal
                                     m("video", {
                                       src: vidUrl,
                                       class: "w-full aspect-[9/16] object-cover rounded-xl bg-black", 
@@ -271,7 +280,6 @@ const ConcertLayout = () => {
             m("p", { class: "text-slate-500 text-sm" }, "© 2026 TemanKonser.fest. Created By ragaes-ui.")
           )
         )
-
       );
     }
   };

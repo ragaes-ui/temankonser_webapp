@@ -4,18 +4,31 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mithril": "^2.3.8"
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "mithril": "^2.3.8",
+    "mongoose": "^9.9.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.5.4",
     "postcss": "^8.5.23",
     "tailwindcss": "^3.4.19",
     "vite": "^8.1.5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ragaes-ui/temankonser_webapp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ragaes-ui/temankonser_webapp/issues"
+  },
+  "homepage": "https://github.com/ragaes-ui/temankonser_webapp#readme"
 }
