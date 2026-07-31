@@ -96,6 +96,15 @@ const ConcertLayout = () => {
     },
 
     view: () => {
+      // 1. TAMBAHKAN PENJAGA INI: Jika data list masih kosong/null, jangan jalankan .find() dulu
+      if (!ConcertState.list || ConcertState.list.length === 0) {
+        return m("div", { class: "min-h-screen bg-slate-900 flex items-center justify-center text-white" }, 
+          m("div", { class: "text-center" },
+            m("div", { class: "w-10 h-10 border-4 border-slate-700 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3" }),
+            m("p", { class: "text-slate-400 text-sm tracking-wider" }, "Menghubungkan ke Server Database...")
+          )
+        );
+      }
       const currentId = m.route.param("id");
       const activeConcert = ConcertState.list.find(c => c.id === currentId);
       
