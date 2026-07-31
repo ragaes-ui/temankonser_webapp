@@ -137,6 +137,22 @@ const ConcertState = {
 
     },
     {
+      id: "Bangorfest Vol.4", 
+      shortTitle: "Bangorfest Vol.4 (Day 1)", 
+      title: "Bangorfest Vol.4", 
+      desc: "Satu hari disenayan bareng sing along musik terkenal, yang sangat seru pastinya.", 
+      gallery:[
+      ]     
+    },
+        {
+      id: "+62 RI-FEST", 
+      shortTitle: "+62 RI-FEST 26", 
+      title: "+62 RI-FEST", 
+      desc: "3 hari di Jiexpo Kemayoran bareng sing along musik terkenal, dari mulai jawaan hingga artis 1960 an, yang sangat seru pastinya.", 
+      gallery:[
+      ]     
+    },
+    {
       id: "foto-nongkrong",
       shortTitle: "Nongkrong",
       title: "Foto Nongkrong",
@@ -164,7 +180,14 @@ const ConcertState = {
         "https://drive.google.com/file/d/1KKCkZkjncM-zxUv7osdXbMjL76maSSut/view?usp=sharing",
         "https://drive.google.com/file/d/1byB6wWkfGKT2H6v_IXSFcXpy3zPcctnS/view?usp=sharing",
         "https://drive.google.com/file/d/1ZaA-6QYXujZ0s6mBPmZaCkrfi-p8o101/view?usp=sharing",
-        "https://drive.google.com/file/d/1cDMu1uj57XmCtKjDt738Z8mtdI5x5Mwo/view?usp=sharing"
+        "https://drive.google.com/file/d/1cDMu1uj57XmCtKjDt738Z8mtdI5x5Mwo/view?usp=sharing",
+        "https://drive.google.com/file/d/1RANCOilSsliKkLKQi32xMMWSwoBbVRrD/view?usp=sharing",
+        "https://drive.google.com/file/d/1PozTjBuFSUyn-DGhQ_KhwVdAChW6q6Mm/view?usp=sharing",
+        "https://drive.google.com/file/d/1BHt_R6Xp1eaGKpqRKPZ7LWFRGs4LUXf1/view?usp=sharing",
+        "https://drive.google.com/file/d/1Te1qlMwKNphyL4-ewiqpFvxvtL6kECWV/view?usp=sharing",
+        "https://drive.google.com/file/d/1gzMlpGxYYVuFBbae6uWJjcS86C58r8yE/view?usp=sharing",
+        "https://drive.google.com/file/d/1DYUjbQ1W_5UbcuCTGAOFLHz9dcV2ESjB/view?usp=sharing",
+        "https://drive.google.com/file/d/1Ldh-kleLpbqHNUiVTFJJK37AY8WL9zUB/view?usp=sharing"
 
       ]
     }
