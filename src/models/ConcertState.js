@@ -196,7 +196,8 @@ const ConcertState = {
         // Opsi 2: Jika terpaksa pakai Google Drive 
         // (Pastikan link berakhiran /preview, BUKAN /view?usp=sharing)
         "https://drive.google.com/file/d/1kAyi3NwhZ63rD4XPvjuXPEqBDdEu469g/preview",
-        "https://drive.google.com/file/d/1ZJc_KPj1grfE1D5b2Pp7R3vc0zpKIafn/preview"
+        "https://drive.google.com/file/d/1ZJc_KPj1grfE1D5b2Pp7R3vc0zpKIafn/preview",
+        "https://drive.google.com/file/d/1RU6BpJ1uXIBNfQZzuYcxiaBh7ahFvNhb/preview"
       ]
     }
     
