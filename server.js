@@ -152,14 +152,16 @@ app.delete("/api/concerts/:id", async (req, res) => {
   }
 });
 
-// 5. JALANKAN SERVER (LOKAL vs VERCEL)
-// ==========================================
-if (process.env.VERCEL) {
-  // Jika sedang berjalan di server Vercel
-  module.exports = app;
-} else {
-  // Jika sedang berjalan di laptop/lokal
-  app.listen(3000, () => {
-    console.log("Server API berjalan di port 3000 🚀 (Mode Lokal)");
+// Kalau sebelumnya cuma begini:
+// app.listen(3000, () => console.log("Server running..."));
+
+// UBAH MENJADI SEPERTI INI UNTUK VERCEL:
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server berjalan di port ${PORT}`);
   });
 }
+
+// WAJIB ADA BARIS INI AGAR VERCEL BISA MEMBACA API MAS:
+module.exports = app;
