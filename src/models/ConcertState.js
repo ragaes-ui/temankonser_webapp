@@ -18,7 +18,8 @@ const ConcertState = {
     try {
       const data = await m.request({
         method: "GET",
-        url: `${API_URL}/concerts`
+        // Menggunakan Date.now() untuk menembus Cache Vercel
+        url: `${API_URL}/concerts?t=${Date.now()}`, 
       });
       
       // PENGAMAN MUTLAK VERCEL: Pastikan hasil dari database selalu berupa Array

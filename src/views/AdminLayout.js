@@ -33,11 +33,12 @@ oninit: async () => {
     }
   },
 
-  fetchHistory: async () => {
+fetchHistory: async () => {
     try {
       const data = await m.request({
         method: "GET",
-        url: `${API_URL}/concerts`, // KODE DIPERBAIKI
+        // TAMBAHKAN ?t=${Date.now()} DI UJUNG URL
+        url: `${API_URL}/concerts?t=${Date.now()}`, 
       });
       AdminLayout.concertList = data;
     } catch (error) {
