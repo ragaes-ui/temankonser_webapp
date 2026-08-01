@@ -102,10 +102,27 @@ const ConcertLayout = () => {
       }
     },
 
-    view: () => {
-      const currentId = m.route.param("id") || "home";
-      const activeConcert = ConcertState.list?.find(c => c.id === currentId);
-      
+view: () => {
+      const rawParam = m.route.param("id") || "home";
+      const currentId = decodeURIComponent(rawParam).toLowerCase().trim();
+
+      // Pencarian super fleksibel: Cek id, _id, shortTitle, maupun title
+      const activeConcert = ConcertState.list?.find(c => {
+        const cId = String(c.id || c._id || "").toLowerCase().trim();
+        const cShort = String(c.shortTitle || "").toLowerCase().trim();
+        const cTitle = String(c.title || "").toLowerCase().trim();
+
+        return (
+          cId === currentId ||
+          cShort === currentId ||
+          cTitle === currentId ||
+          // Cek juga jika ada perbedaan spasi / tanda hubung (misal: "dokumentasi-olahraga" vs "dokumentasi olahraga")
+          cId.replace(/-/g, " ") === currentId.replace(/-/g, " ") ||
+          cShort.replace(/-/g, " ") === currentId.replace(/-/g, " ") ||
+          cTitle.replace(/-/g, " ") === currentId.replace(/-/g, " ")
+        );
+      });
+
       // Mengecek apakah konser ini punya data video
       const hasVideos = activeConcert && activeConcert.videos && activeConcert.videos.length > 0;
 
