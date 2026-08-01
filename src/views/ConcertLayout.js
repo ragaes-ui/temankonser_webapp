@@ -220,20 +220,22 @@ const ConcertLayout = () => {
                                       observer.observe(vnode.dom);
                                     }
                                   },
-                                    vidUrl.includes("drive.google.com") ? 
-                                      m("iframe", {
-                                        src: vidUrl,
-                                        class: "w-full aspect-[9/16] rounded-lg", 
-                                        allowfullscreen: true,
-                                        loading: "lazy"
-                                      })
-                                    : 
-                                      m("video", {
-                                        src: vidUrl,
-                                        class: "w-full aspect-[9/16] object-cover rounded-lg bg-black", 
-                                        controls: true,
-                                        preload: "metadata"
-                                      })
+vidUrl.includes("drive.google.com") ? 
+                                    m("iframe", {
+                                      src: vidUrl,
+                                      // Hapus aspect-[9/16], ganti dengan tinggi yang responsif
+                                      class: "w-full h-[400px] md:h-[500px] rounded-xl border-0", 
+                                      allowfullscreen: true,
+                                      loading: "lazy"
+                                    })
+                                  : 
+                                    m("video", {
+                                      src: vidUrl,
+                                      // Gunakan object-contain agar video utuh tidak di-crop
+                                      class: "w-full h-[400px] md:h-[500px] object-contain rounded-xl bg-black shadow-inner", 
+                                      controls: true,
+                                      preload: "metadata"
+                                    })
                                   )
                                 )
                               )
