@@ -8,9 +8,6 @@ const ConcertLayout = () => {
   let previousId = null;
   let isOpen = false;
   
-  // State untuk menentukan mana yang sedang aktif ("foto" atau "video")
-  let activeTab = "foto"; 
-
   // --- STATE UNTUK ANIMASI KETIK (TYPEWRITER) ---
   const words = ["Teman Konser Festival", "Ruang Arsip Digital", "Memori Area Moshpit"];
   let currentText = "";
@@ -18,15 +15,13 @@ const ConcertLayout = () => {
   let loopNum = 0;
   let typeTimer = null;
 
-const runTypewriter = () => {
-    // Tambahkan || "home" di sini juga
+  const runTypewriter = () => {
     const checkId = m.route.param("id") || "home";
     
     if (checkId !== "home") {
       typeTimer = setTimeout(runTypewriter, 1000); 
       return; 
     }
-    // ...
 
     const i = loopNum % words.length;
     const fullText = words[i];
@@ -54,7 +49,6 @@ const runTypewriter = () => {
   };
 
   return {
-    // KODE DIPERBAIKI: Tambahkan 'async' di sini
     oninit: async () => {
       // 1. Tarik data dari Database saat web pertama kali dibuka
       if (ConcertState.list.length === 0) {
@@ -82,13 +76,12 @@ const runTypewriter = () => {
     onupdate: () => {
       const currentId = m.route.param("id") || "home";
       
-      // KODE DIPERBAIKI: Selalu update state konser yang aktif setiap pindah halaman
+      // Selalu update state konser yang aktif setiap pindah halaman
       ConcertState.setConcert(currentId);
 
       if (currentId !== previousId) {
         previousId = currentId;
         isOpen = false; 
-        activeTab = "foto"; // Reset tab ke foto setiap pindah halaman konser
         isLoading = true;
         m.redraw();
         
@@ -99,10 +92,8 @@ const runTypewriter = () => {
       }
     },
 
-view: () => {
-      
+    view: () => {
       const currentId = m.route.param("id") || "home";
-      // KODE DIPERBAIKI: Tambahkan tanda "?" sebelum ".find"
       const activeConcert = ConcertState.list?.find(c => c.id === currentId);
       
       // Mengecek apakah konser ini punya data video
@@ -189,70 +180,75 @@ view: () => {
                         onclick: () => { isOpen = true; }
                       }, "Buka Dokumentasi")
                     : 
-                      m("div", { class: "mt-8 animate-[fadeIn_0.5s_ease-out_1]" },
+                      m("div", { class: "mt-12 animate-[fadeIn_0.5s_ease-out_1]" },
                         
-                        // Tombol Tab Sejajar (Foto | Video)
-                        m("div", { class: "flex justify-center items-center gap-4 mb-10 border-b border-slate-700 pb-4" },
-                          m("button", {
-                            class: `px-6 py-2 rounded-full font-semibold transition-all duration-300 ${activeTab === 'foto' ? 'bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)]' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'}`,
-                            onclick: () => { activeTab = "foto"; }
-                          }, "📷 Arsip Foto"),
+                        // GRID 2 KOLOM: Kiri untuk Foto, Kanan untuk Video (Bersebelahan)
+                        m("div", { class: "grid grid-cols-1 lg:grid-cols-2 gap-10 items-start text-left" },
                           
-                          // Tombol video hanya muncul jika ada videonya
-                          hasVideos ? m("button", {
-                            class: `px-6 py-2 rounded-full font-semibold transition-all duration-300 ${activeTab === 'video' ? 'bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)]' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'}`,
-                            onclick: () => { activeTab = "video"; }
-                          }, "🎥 Arsip Video") : null
-                        ),
+                          // --- KOLOM KIRI: ARSIP FOTO ---
+                          m("div", { class: "w-full" },
+                            m("div", { class: "flex items-center gap-3 mb-6 border-b border-slate-700 pb-3" },
+                              m("span", { class: "text-2xl" }, "📷"),
+                              m("h3", { class: "text-2xl font-bold text-slate-200" }, "Arsip Foto")
+                            ),
+                            m("div", { class: "bg-slate-900/50 p-4 rounded-2xl border border-slate-700/50 shadow-inner" },
+                              m(PhotoGrid, { images: activeConcert.gallery })
+                            )
+                          ),
 
-                        // Area Konten
-                        activeTab === "foto" ? 
-                          // TAMPILAN FOTO
-                          m("div", { class: "animate-[fadeIn_0.4s_ease-out_1]" },
-                            m(PhotoGrid, { images: activeConcert.gallery })
-                          )
-                        :
-                          // TAMPILAN VIDEO
-                          m("div", { class: "animate-[fadeIn_0.4s_ease-out_1]" },
-                            m("div", { class: "flex flex-wrap justify-center gap-8" },
-                              (activeConcert.videos || []).map((vidUrl, index) => 
-                                m("div", { 
-                                  class: "w-full max-w-[320px] sm:max-w-[360px] bg-black/50 p-2 rounded-2xl shadow-lg border border-slate-700 opacity-0 transform translate-y-12 transition-all duration-1000 ease-out flex flex-col items-center justify-center",
-                                  oncreate: (vnode) => {
-                                    const observer = new IntersectionObserver((entries) => {
-                                      if (entries[0].isIntersecting) {
-                                        setTimeout(() => {
-                                          vnode.dom.classList.remove("opacity-0", "translate-y-12");
-                                          vnode.dom.classList.add("opacity-100", "translate-y-0");
-                                        }, index * 300); 
-                                        observer.unobserve(vnode.dom);
-                                      }
-                                    }, { threshold: 0.1 });
-                                    observer.observe(vnode.dom);
-                                  }
-                                },
-                                  vidUrl.includes("drive.google.com") ? 
-                                    m("iframe", {
-                                      src: vidUrl,
-                                      class: "w-full aspect-[9/16] rounded-xl", 
-                                      allowfullscreen: true,
-                                      loading: "lazy"
-                                    })
-                                  : 
-                                    m("video", {
-                                      src: vidUrl,
-                                      class: "w-full aspect-[9/16] object-cover rounded-xl bg-black", 
-                                      controls: true,
-                                      preload: "metadata"
-                                    })
+                          // --- KOLOM KANAN: ARSIP VIDEO ---
+                          hasVideos ? 
+                            m("div", { class: "w-full" },
+                              m("div", { class: "flex items-center gap-3 mb-6 border-b border-slate-700 pb-3" },
+                                m("span", { class: "text-2xl" }, "🎥"),
+                                m("h3", { class: "text-2xl font-bold text-slate-200" }, "Arsip Video")
+                              ),
+                              m("div", { class: "grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-900/50 p-4 rounded-2xl border border-slate-700/50 shadow-inner" },
+                                (activeConcert.videos || []).map((vidUrl, index) => 
+                                  m("div", { 
+                                    class: "w-full bg-black/80 p-2 rounded-xl shadow-lg border border-slate-700 opacity-0 transform translate-y-12 transition-all duration-1000 ease-out",
+                                    oncreate: (vnode) => {
+                                      const observer = new IntersectionObserver((entries) => {
+                                        if (entries[0].isIntersecting) {
+                                          setTimeout(() => {
+                                            vnode.dom.classList.remove("opacity-0", "translate-y-12");
+                                            vnode.dom.classList.add("opacity-100", "translate-y-0");
+                                          }, index * 200); 
+                                          observer.unobserve(vnode.dom);
+                                        }
+                                      }, { threshold: 0.1 });
+                                      observer.observe(vnode.dom);
+                                    }
+                                  },
+                                    vidUrl.includes("drive.google.com") ? 
+                                      m("iframe", {
+                                        src: vidUrl,
+                                        class: "w-full aspect-[9/16] rounded-lg", 
+                                        allowfullscreen: true,
+                                        loading: "lazy"
+                                      })
+                                    : 
+                                      m("video", {
+                                        src: vidUrl,
+                                        class: "w-full aspect-[9/16] object-cover rounded-lg bg-black", 
+                                        controls: true,
+                                        preload: "metadata"
+                                      })
+                                  )
                                 )
                               )
+                            ) 
+                          : 
+                            // Jika tidak ada video, tampilkan pesan kosong di sebelah kanan
+                            m("div", { class: "w-full flex flex-col items-center justify-center bg-slate-900/30 p-10 rounded-2xl border border-slate-700/50 border-dashed" },
+                              m("span", { class: "text-4xl mb-3 opacity-50" }, "🎥"),
+                              m("p", { class: "text-slate-500 italic" }, "Belum ada arsip video untuk konser ini.")
                             )
-                          )
-
+                        )
                       )
                   )
                 : 
+                  // BAGIAN INI YANG TERHAPUS SEBELUMNYA
                   m("div", { class: "text-center text-slate-500 mt-20 text-lg" }, "Laman tidak ditemukan.")
                 )
             )
