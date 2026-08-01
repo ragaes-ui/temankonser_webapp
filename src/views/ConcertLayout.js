@@ -48,18 +48,28 @@ const ConcertLayout = () => {
     typeTimer = setTimeout(runTypewriter, typingSpeed);
   };
 
+  // KATA "RETURN {" INI SANGAT PENTING DAN TIDAK BOLEH HILANG
   return {
     oninit: async () => {
       // 1. Tarik data dari Database saat web pertama kali dibuka
       if (ConcertState.list.length === 0) {
+        // Kode ini akan menahan proses sampai data benar-benar selesai ditarik!
         await ConcertState.loadConcerts();
       }
 
       previousId = m.route.param("id") || "home";
-      
-      // 2. Set konser yang sedang aktif di state
       ConcertState.setConcert(previousId);
 
+      // --- TUTUP SPLASH SCREEN SETELAH DATA DATABASE BERHASIL DIMUAT ---
+      const loader = document.getElementById("global-loader");
+      if (loader) {
+        loader.style.opacity = "0"; // Memudar perlahan
+        setTimeout(() => {
+          loader.remove(); // Dihapus dari HTML
+        }, 700);
+      }
+
+      // Animasi transisi internal Mithril
       isLoading = true;
       setTimeout(() => {
         isLoading = false;
@@ -220,22 +230,20 @@ const ConcertLayout = () => {
                                       observer.observe(vnode.dom);
                                     }
                                   },
-vidUrl.includes("drive.google.com") ? 
-                                    m("iframe", {
-                                      src: vidUrl,
-                                      // Hapus aspect-[9/16], ganti dengan tinggi yang responsif
-                                      class: "w-full h-[400px] md:h-[500px] rounded-xl border-0", 
-                                      allowfullscreen: true,
-                                      loading: "lazy"
-                                    })
-                                  : 
-                                    m("video", {
-                                      src: vidUrl,
-                                      // Gunakan object-contain agar video utuh tidak di-crop
-                                      class: "w-full h-[400px] md:h-[500px] object-contain rounded-xl bg-black shadow-inner", 
-                                      controls: true,
-                                      preload: "metadata"
-                                    })
+                                    vidUrl.includes("drive.google.com") ? 
+                                      m("iframe", {
+                                        src: vidUrl,
+                                        class: "w-full h-[400px] md:h-[500px] rounded-xl border-0", 
+                                        allowfullscreen: true,
+                                        loading: "lazy"
+                                      })
+                                    : 
+                                      m("video", {
+                                        src: vidUrl,
+                                        class: "w-full h-[400px] md:h-[500px] object-contain rounded-xl bg-black shadow-inner", 
+                                        controls: true,
+                                        preload: "metadata"
+                                      })
                                   )
                                 )
                               )
@@ -250,7 +258,6 @@ vidUrl.includes("drive.google.com") ?
                       )
                   )
                 : 
-                  // BAGIAN INI YANG TERHAPUS SEBELUMNYA
                   m("div", { class: "text-center text-slate-500 mt-20 text-lg" }, "Laman tidak ditemukan.")
                 )
             )
