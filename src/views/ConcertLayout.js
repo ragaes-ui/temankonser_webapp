@@ -57,7 +57,7 @@ const ConcertLayout = () => {
         await ConcertState.loadConcerts();
       }
 
-      previousId = m.route.param("id");
+      previousId = m.route.param("id") || "home";
       
       // 2. Set konser yang sedang aktif di state
       ConcertState.setConcert(previousId);
@@ -76,7 +76,7 @@ const ConcertLayout = () => {
     },
 
     onupdate: () => {
-      const currentId = m.route.param("id");
+      const currentId = m.route.param("id") || "home";
       
       // KODE DIPERBAIKI: Selalu update state konser yang aktif setiap pindah halaman
       ConcertState.setConcert(currentId);
@@ -97,7 +97,7 @@ const ConcertLayout = () => {
 
 view: () => {
       
-      const currentId = m.route.param("id");
+      const currentId = m.route.param("id") || "home";
       // KODE DIPERBAIKI: Tambahkan tanda "?" sebelum ".find"
       const activeConcert = ConcertState.list?.find(c => c.id === currentId);
       
