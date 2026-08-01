@@ -103,7 +103,8 @@ fetchHistory: async () => {
       try {
         await m.request({
           method: "DELETE",
-          url: `${API_URL}/concerts/${id}` // KODE DIPERBAIKI
+          // TAMBAHKAN encodeURIComponent DI SINI
+          url: `${API_URL}/concerts/${encodeURIComponent(id)}` 
         });
         await AdminLayout.fetchHistory(); // Refresh tabel
       } catch (error) {
@@ -111,6 +112,7 @@ fetchHistory: async () => {
       }
     }
   },
+
 
   submitData: async (e) => {
     e.preventDefault();
@@ -130,10 +132,12 @@ fetchHistory: async () => {
       await m.request({
         method: AdminLayout.isEditing ? "PUT" : "POST",
         url: AdminLayout.isEditing 
-          ? `${API_URL}/concerts/${payload.id}`  // KODE DIPERBAIKI
-          : `${API_URL}/concerts`,               // KODE DIPERBAIKI
+          // TAMBAHKAN encodeURIComponent DI SINI
+          ? `${API_URL}/concerts/${encodeURIComponent(payload.id)}`  
+          : `${API_URL}/concerts`,               
         body: payload
       });
+
 
       AdminLayout.statusMsg = AdminLayout.isEditing ? "Event berhasil di-update! 🎉" : "Berhasil! Event baru ditambahkan. 🎉";
       AdminLayout.cancelEdit(); // Kosongkan form & reset mode
