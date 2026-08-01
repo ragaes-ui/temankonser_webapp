@@ -16,7 +16,17 @@ const AdminLayout = {
   formData: { id: "", shortTitle: "", title: "", desc: "", galleryInput: "", videosInput: "" },
   statusMsg: "",
 
-  oninit: async () => {
+oninit: async () => {
+    // --- TAMBAHKAN SAKELAR PEMUTUS LOADING DI SINI ---
+    const loader = document.getElementById("global-loader");
+    if (loader) {
+      loader.style.opacity = "0";
+      setTimeout(() => {
+        loader.remove();
+      }, 700);
+    }
+    // ------------------------------------------------
+
     if (localStorage.getItem("adminToken")) {
       AdminLayout.isLoggedIn = true;
       await AdminLayout.fetchHistory(); // Tarik riwayat jika sudah login
