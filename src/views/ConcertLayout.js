@@ -3,6 +3,17 @@ import ConcertState from "../models/ConcertState.js";
 import Navbar from "../components/Navbar.js";
 import PhotoGrid from "../components/PhotoGrid.js";
 
+// --- FUNGSI PENGUBAH LINK VIDEO GOOGLE DRIVE (TAMBAHAN BARU) ---
+const formatVideoEmbed = (url) => {
+  if (!url) return "";
+  // Melacak dan mengambil ID unik dari link Google Drive
+  const match = url.match(/\/d\/(.*?)\//) || url.match(/id=(.*?)(&|$)/);
+  // Merakit ulang link menjadi format /preview yang diizinkan untuk iframe
+  if (match && match[1]) return `https://drive.google.com/file/d/${match[1]}/preview`;
+  return url; 
+};
+// ----------------------------------------------------------------
+
 const ConcertLayout = () => {
   let isLoading = false;
   let previousId = null;
@@ -248,12 +259,15 @@ view: () => {
                                     }
                                   },
                                     vidUrl.includes("drive.google.com") ? 
+                                      // --- PERUBAHAN IFRAME DI SINI ---
                                       m("iframe", {
-                                        src: vidUrl,
+                                        src: formatVideoEmbed(vidUrl), // Fungsi diterapkan
                                         class: "w-full h-[400px] md:h-[500px] rounded-xl border-0", 
                                         allowfullscreen: true,
-                                        loading: "lazy"
+                                        loading: "lazy",
+                                        sandbox: "allow-scripts allow-same-origin allow-popups" // Sandbox diterapkan
                                       })
+                                      // ---------------------------------
                                     : 
                                       m("video", {
                                         src: vidUrl,
