@@ -8,12 +8,23 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
   
-  <!-- Kontainer Utama tempat Mithril merender UI -->
-  <div id="app">
-    <div class="flex min-h-screen items-center justify-center">
-      <p class="text-slate-500">Memuat dokumentasi konser...</p>
+  <!-- ================= SPASH SCREEN LOADING ================= -->
+  <div id="global-loader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-700 ease-out">
+    <div class="relative flex items-center justify-center">
+      <!-- Cincin Berputar -->
+      <div class="w-20 h-20 border-4 border-slate-800 border-t-indigo-500 rounded-full animate-spin shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
+      <!-- Titik Tengah Berdenyut -->
+      <div class="absolute w-4 h-4 bg-indigo-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.8)]"></div>
     </div>
+    <!-- Teks Animasi -->
+    <h2 class="mt-8 text-xl md:text-2xl font-bold tracking-[0.3em] text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500 animate-pulse uppercase">
+      Memuat Memori
+    </h2>
   </div>
+  <!-- ================= AKHIR SPLASH SCREEN ================= -->
+
+  <!-- Kontainer Utama tempat Mithril merender UI (Dikosongkan karena sudah ada global-loader di atas) -->
+  <div id="app"></div>
 
   <!-- Vite akan membaca file ini dan memproses CSS serta JS secara otomatis -->
   <script type="module" src="/src/main.js"></script>
