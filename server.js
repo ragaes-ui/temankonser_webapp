@@ -130,27 +130,66 @@ app.post("/api/concerts", async (req, res) => {
 // API Update Konser (Edit Data & Tambah Foto)
 app.put("/api/concerts/:id", async (req, res) => {
   try {
-    // Mencari konser berdasarkan ID, lalu menimpanya dengan data baru dari form
+    // 1. Ambil data dari form, tapi HAPUS _id bawaan agar MongoDB tidak menolak update
+    const dataUpdate = { ...req.body };
+    delete dataUpdate._id; 
+
+    // 2. Pencarian Fleksibel: Cari berdasarkan custom 'id' ATAU '_id' bawaan MongoDB
+    const queryPencarian = {
+      $or: [
+        { id: req.params.id }
+      ]
+    };
+    
+    // Jika ID dari URL panjangnya pas 24 karakter (format khas MongoDB ObjectId), tambahkan ke pencarian
+    if (req.params.id.length === 24) {
+      queryPencarian.$or.push({ _id: req.params.id });
+    }
+
+    // 3. Eksekusi update
     const updatedConcert = await Concert.findOneAndUpdate(
-      { id: req.params.id }, 
-      req.body, 
+      queryPencarian, 
+      dataUpdate, 
       { new: true }
     );
+
+    // 4. Jika data benar-benar tidak ada di database, lempar error
+    if (!updatedConcert) {
+      return res.status(404).json({ success: false, message: "Aduh, data tidak ditemukan di database!" });
+    }
+
+    // 5. Berhasil!
     res.json(updatedConcert);
+    
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error("Gagal Update:", err);
+    res.status(400).json({ success: false, message: err.message });
   }
 });
+
 
 // API Hapus Konser
 app.delete("/api/concerts/:id", async (req, res) => {
   try {
-    await Concert.findOneAndDelete({ id: req.params.id });
+    // Pencarian Fleksibel sama seperti saat Update
+    const queryPencarian = { $or: [{ id: req.params.id }] };
+    
+    if (req.params.id.length === 24) {
+      queryPencarian.$or.push({ _id: req.params.id });
+    }
+
+    const deletedConcert = await Concert.findOneAndDelete(queryPencarian);
+    
+    if (!deletedConcert) {
+      return res.status(404).json({ success: false, message: "Konser tidak ditemukan di database" });
+    }
+
     res.json({ success: true, message: "Konser berhasil dihapus" });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
+
 
 // Kalau sebelumnya cuma begini:
 // app.listen(3000, () => console.log("Server running..."));
