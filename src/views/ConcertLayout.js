@@ -18,11 +18,15 @@ const ConcertLayout = () => {
   let loopNum = 0;
   let typeTimer = null;
 
-  const runTypewriter = () => {
-    if (m.route.param("id") !== "home") {
+const runTypewriter = () => {
+    // Tambahkan || "home" di sini juga
+    const checkId = m.route.param("id") || "home";
+    
+    if (checkId !== "home") {
       typeTimer = setTimeout(runTypewriter, 1000); 
       return; 
     }
+    // ...
 
     const i = loopNum % words.length;
     const fullText = words[i];
