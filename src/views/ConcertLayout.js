@@ -269,7 +269,7 @@ view: () => {
                             // Jika tidak ada video, tampilkan pesan kosong di sebelah kanan
                             m("div", { class: "w-full flex flex-col items-center justify-center bg-slate-900/30 p-10 rounded-2xl border border-slate-700/50 border-dashed" },
                               m("span", { class: "text-4xl mb-3 opacity-50" }, "🎥"),
-                              m("p", { class: "text-slate-500 italic" }, "Belum ada arsip video untuk konser ini.")
+                              m("p", { class: "text-slate-500 italic" }, "Belum ada arsip video untuk dokumentasi event ini.")
                             )
                         )
                       )
