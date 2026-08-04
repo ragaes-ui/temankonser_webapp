@@ -60,20 +60,15 @@ const Admin = mongoose.model("Admin", adminSchema);
 // Fungsi ini akan mengecek apakah di database sudah ada admin.
 // Kalau belum, dia akan membuatkannya otomatis beserta password yang di-hash.
 const buatAkunAdminPertama = async () => {
-  const adminAda = await Admin.findOne({ username: "raga" });
+  // Cukup cari apakah ADA admin, tidak usah spesifik nama "raga"
+  const adminAda = await Admin.findOne(); 
   
   if (!adminAda) {
-    // Proses Hashing Password (mengacak password "admin123")
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash("admin123", salt);
-
-    const adminBaru = new Admin({
-      username: "raga",
-      password: hashedPassword // Yang disimpan adalah versi acak-nya
-    });
-
+    const adminBaru = new Admin({ username: "raga", password: hashedPassword });
     await adminBaru.save();
-    console.log("Akun Admin 'raga' berhasil ditambahkan ke Database dengan password Hashed! 🔒");
+    console.log("Akun Admin awal berhasil ditambahkan! 🔒");
   }
 };
 
@@ -102,6 +97,37 @@ app.post("/api/login", async (req, res) => {
     } else {
       res.status(401).json({ success: false, message: "Password salah mas!" });
     }
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Terjadi kesalahan di server." });
+  }
+});
+// API Ubah Username & Password
+app.put("/api/admin/settings", async (req, res) => {
+  const { oldPassword, newUsername, newPassword } = req.body;
+  
+  try {
+    // Ambil akun admin yang sedang login (karena cuma 1, ambil yang pertama)
+    const adminUser = await Admin.findOne(); 
+    if (!adminUser) return res.status(404).json({ success: false, message: "Admin tidak ditemukan" });
+
+    // Cek apakah password lama yang dimasukkan benar
+    const passwordCocok = await bcrypt.compare(oldPassword, adminUser.password);
+    if (!passwordCocok) {
+      return res.status(401).json({ success: false, message: "Password Lama Salah!" });
+    }
+
+    // Update data
+    adminUser.username = newUsername || adminUser.username;
+    
+    // Jika kolom password baru diisi, acak lagi passwordnya
+    if (newPassword && newPassword.trim() !== "") {
+      const salt = await bcrypt.genSalt(10);
+      adminUser.password = await bcrypt.hash(newPassword, salt);
+    }
+
+    await adminUser.save();
+    res.json({ success: true, message: "Akun berhasil diupdate! Silakan login ulang nanti." });
+
   } catch (error) {
     res.status(500).json({ success: false, message: "Terjadi kesalahan di server." });
   }
