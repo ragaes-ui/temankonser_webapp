@@ -248,18 +248,29 @@ app.delete("/api/concerts/:id", async (req, res) => {
 // Kalau sebelumnya cuma begini:
 // app.listen(3000, () => console.log("Server running..."));
 // --- API UNTUK MENGINTIP DAFTAR MODEL GOOGLE ---
+// --- API RADAR VERSI SIMPEL ---
 app.get("/api/cek-model", async (req, res) => {
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`;
+    const kunci = process.env.GEMINI_API_KEY;
     
-    // Karena di Node.js kita butuh dynamic import untuk fetch, kita panggil seperti ini
-    const fetch = (await import('node-fetch')).default || global.fetch;
-    
-    const response = await fetch(url);
+    // 1. Cek dulu apakah Vercel beneran udah baca kuncinya
+    if (!kunci || kunci === "KUNCI_KOSONG") {
+      return res.json({ 
+        status: "GAGAL", 
+        pesan: "Wah mas, Vercelnya ternyata belum baca API Key-nya! Berarti redeploy-nya belum berhasil." 
+      });
+    }
+
+    // 2. Kalau kunci ada, kita intip Google pakai fetch bawaan server
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${kunci}`);
     const data = await response.json();
-    res.json(data);
+    
+    res.json({ 
+      status: "SUKSES_BACA_KUNCI", 
+      data_dari_google: data 
+    });
   } catch (error) {
-    res.status(500).json({ error: "Gagal mengintip server Google" });
+    res.json({ status: "ERROR_SISTEM", pesan: error.message });
   }
 });
 // UBAH MENJADI SEPERTI INI UNTUK VERCEL:
