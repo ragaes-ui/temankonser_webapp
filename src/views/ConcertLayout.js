@@ -40,7 +40,7 @@ const ConcertLayout = () => {
     try {
       const res = await m.request({
         method: "POST",
-        url: `${API_URL}/chat`,
+        url: `${API_URL}/tanya`,
         body: { pesan: userText }
       });
       // Masukkan balasan AI ke layar

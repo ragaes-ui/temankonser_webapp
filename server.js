@@ -138,7 +138,7 @@ app.put("/api/admin/settings", async (req, res) => {
 });
 
 // --- API CHATBOT GEMINI AI (BARU) ---
-app.post("/api/chat", async (req, res) => {
+app.post("/api/tanya", async (req, res) => {
   try {
     const { pesan } = req.body;
     
