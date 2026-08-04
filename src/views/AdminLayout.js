@@ -9,15 +9,18 @@ const AdminLayout = {
   loginError: "",
   isLoading: false,
 
+  // --- STATE UNTUK PENGATURAN AKUN ---
+  accountData: { oldPassword: "", newUsername: "", newPassword: "" },
+  accountMsg: "",
+  
   // State untuk Data Event
-  concertList: [], // Menyimpan riwayat event
-  isEditing: false, // Penanda apakah sedang nambah baru atau edit
+  concertList: [], 
+  isEditing: false, 
   
   formData: { id: "", shortTitle: "", title: "", desc: "", galleryInput: "", videosInput: "" },
   statusMsg: "",
 
-oninit: async () => {
-    // --- TAMBAHKAN SAKELAR PEMUTUS LOADING DI SINI ---
+  oninit: async () => {
     const loader = document.getElementById("global-loader");
     if (loader) {
       loader.style.opacity = "0";
@@ -25,19 +28,17 @@ oninit: async () => {
         loader.remove();
       }, 700);
     }
-    // ------------------------------------------------
 
     if (localStorage.getItem("adminToken")) {
       AdminLayout.isLoggedIn = true;
-      await AdminLayout.fetchHistory(); // Tarik riwayat jika sudah login
+      await AdminLayout.fetchHistory(); 
     }
   },
 
-fetchHistory: async () => {
+  fetchHistory: async () => {
     try {
       const data = await m.request({
         method: "GET",
-        // TAMBAHKAN ?t=${Date.now()} DI UJUNG URL
         url: `${API_URL}/concerts?t=${Date.now()}`, 
       });
       AdminLayout.concertList = data;
@@ -54,14 +55,14 @@ fetchHistory: async () => {
     try {
       const res = await m.request({
         method: "POST",
-        url: `${API_URL}/login`, // KODE DIPERBAIKI
+        url: `${API_URL}/login`,
         body: AdminLayout.loginData
       });
 
       if (res.success) {
         AdminLayout.isLoggedIn = true;
         localStorage.setItem("adminToken", res.token);
-        await AdminLayout.fetchHistory(); // Tarik riwayat saat sukses login
+        await AdminLayout.fetchHistory(); 
       }
     } catch (error) {
       AdminLayout.loginError = "Akses Ditolak! Username atau Password salah.";
@@ -76,7 +77,6 @@ fetchHistory: async () => {
     AdminLayout.loginData = { username: "", password: "" };
   },
 
-  // Fungsi untuk memasukkan data dari tabel ke dalam form (Mode Edit)
   editEvent: (concert) => {
     AdminLayout.isEditing = true;
     AdminLayout.formData = {
@@ -84,36 +84,32 @@ fetchHistory: async () => {
       shortTitle: concert.shortTitle,
       title: concert.title,
       desc: concert.desc,
-      // Gabungkan array menjadi teks per baris lagi untuk di dalam textarea
       galleryInput: concert.gallery ? concert.gallery.join("\n") : "",
       videosInput: concert.videos ? concert.videos.join("\n") : ""
     };
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll otomatis ke atas
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
   },
 
-  // Fungsi untuk membatalkan mode Edit
   cancelEdit: () => {
     AdminLayout.isEditing = false;
     AdminLayout.formData = { id: "", shortTitle: "", title: "", desc: "", galleryInput: "", videosInput: "" };
   },
 
-  // Fungsi Hapus Event
   deleteEvent: async (id) => {
     if (confirm(`Yakin ingin menghapus event dengan ID: ${id}?\nSemua arsip di dalamnya akan hilang dari web.`)) {
       try {
         await m.request({
           method: "DELETE",
-          // TAMBAHKAN encodeURIComponent DI SINI
           url: `${API_URL}/concerts/${encodeURIComponent(id)}` 
         });
-        await AdminLayout.fetchHistory(); // Refresh tabel
+        await AdminLayout.fetchHistory(); 
       } catch (error) {
         alert("Gagal menghapus event");
       }
     }
   },
 
-
+  // FUNGSI SIMPAN EVENT KITA RAPIKAN AGAR TIDAK BENTROK
   submitData: async (e) => {
     e.preventDefault();
     AdminLayout.statusMsg = "Sedang menyimpan data...";
@@ -128,30 +124,47 @@ fetchHistory: async () => {
     };
 
     try {
-      // Jika mode Edit, gunakan PUT. Jika mode Tambah, gunakan POST.
       await m.request({
         method: AdminLayout.isEditing ? "PUT" : "POST",
         url: AdminLayout.isEditing 
-          // TAMBAHKAN encodeURIComponent DI SINI
           ? `${API_URL}/concerts/${encodeURIComponent(payload.id)}`  
           : `${API_URL}/concerts`,               
         body: payload
       });
-
-
       AdminLayout.statusMsg = AdminLayout.isEditing ? "Event berhasil di-update! 🎉" : "Berhasil! Event baru ditambahkan. 🎉";
-      AdminLayout.cancelEdit(); // Kosongkan form & reset mode
-      await AdminLayout.fetchHistory(); // Tarik ulang riwayat terbaru untuk di tabel
-      
+      AdminLayout.cancelEdit(); 
+      await AdminLayout.fetchHistory(); 
       setTimeout(() => { AdminLayout.statusMsg = ""; m.redraw(); }, 3000);
     } catch (error) {
       AdminLayout.statusMsg = "Gagal menyimpan data. Cek koneksi server.";
     }
   },
 
+  // FUNGSI UPDATE AKUN (Berdiri sendiri, terpisah dari fungsi lain)
+  updateAccount: async (e) => {
+    e.preventDefault();
+    AdminLayout.accountMsg = "Memproses perubahan...";
+    
+    try {
+      const res = await m.request({
+        method: "PUT",
+        url: `${API_URL}/admin/settings`,
+        body: AdminLayout.accountData
+      });
+
+      if (res.success) {
+        AdminLayout.accountMsg = res.message + " 🎉";
+        AdminLayout.accountData = { oldPassword: "", newUsername: "", newPassword: "" };
+        setTimeout(() => { AdminLayout.accountMsg = ""; m.redraw(); }, 4000);
+      }
+    } catch (error) {
+      AdminLayout.accountMsg = error.response ? error.response.message : "Gagal mengupdate akun.";
+      setTimeout(() => { AdminLayout.accountMsg = ""; m.redraw(); }, 4000);
+    }
+  },
+
   view: () => {
     if (!AdminLayout.isLoggedIn) {
-      // --- (Sama dengan sebelumnya, form login) ---
       return m("div", { class: "min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans" },
         m("div", { class: "bg-slate-800 p-8 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.5)] border border-slate-700 w-full max-w-md" },
           m("div", { class: "text-center mb-8" },
@@ -201,7 +214,7 @@ fetchHistory: async () => {
                   m("input", { 
                     class: `w-full p-3 bg-slate-900 rounded-lg border border-slate-600 focus:border-indigo-500 outline-none ${AdminLayout.isEditing ? 'opacity-50 cursor-not-allowed' : ''}`, 
                     placeholder: "contoh: pbb-bogor-2026", value: AdminLayout.formData.id, oninput: (e) => AdminLayout.formData.id = e.target.value, required: true,
-                    disabled: AdminLayout.isEditing // ID tidak boleh diedit agar tidak merusak data lain
+                    disabled: AdminLayout.isEditing 
                   })
                 ),
                 m("div",
@@ -278,6 +291,35 @@ fetchHistory: async () => {
                   )
                 )
               )
+          )
+        ),
+
+        // --- BAGIAN 3: PENGATURAN AKUN ADMIN (POSISINYA YANG BENAR DI SINI) ---
+        m("div", { class: "bg-slate-800 rounded-2xl shadow-lg border border-slate-700 overflow-hidden mt-8 mb-8" },
+          m("div", { class: "border-b border-slate-700 p-6 bg-slate-800/50" },
+            m("h2", { class: "text-lg font-semibold text-white flex items-center gap-2" }, "⚙️ Pengaturan Akun")
+          ),
+          m("form", { class: "p-6", onsubmit: AdminLayout.updateAccount },
+            m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
+              m("div",
+                m("label", { class: "text-slate-300 text-sm font-medium mb-1 block" }, "Username Baru"),
+                m("input", { class: "w-full p-3 bg-slate-900 rounded-lg border border-slate-600 focus:border-indigo-500 outline-none", placeholder: "Biarkan kosong jika tidak diubah", value: AdminLayout.accountData.newUsername, oninput: (e) => AdminLayout.accountData.newUsername = e.target.value })
+              ),
+              m("div",
+                m("label", { class: "text-slate-300 text-sm font-medium mb-1 block" }, "Password Baru"),
+                m("input", { type: "password", class: "w-full p-3 bg-slate-900 rounded-lg border border-slate-600 focus:border-amber-500 outline-none", placeholder: "Biarkan kosong jika tidak diubah", value: AdminLayout.accountData.newPassword, oninput: (e) => AdminLayout.accountData.newPassword = e.target.value })
+              ),
+              m("div",
+                m("label", { class: "text-amber-400 text-sm font-bold mb-1 block" }, "Password Lama (Wajib Diisi)*"),
+                m("input", { type: "password", class: "w-full p-3 bg-slate-900 rounded-lg border border-amber-600 focus:border-amber-400 outline-none", placeholder: "Ketik password saat ini", value: AdminLayout.accountData.oldPassword, oninput: (e) => AdminLayout.accountData.oldPassword = e.target.value, required: true })
+              )
+            ),
+            m("div", { class: "mt-6 flex flex-col items-end" },
+              m("button", { type: "submit", class: "px-6 py-2.5 font-bold rounded-lg text-white bg-slate-700 hover:bg-slate-600 border border-slate-600 transition-all" }, "Update Akun"),
+              AdminLayout.accountMsg ? 
+                m("div", { class: `mt-3 text-sm font-medium ${AdminLayout.accountMsg.includes("Salah") || AdminLayout.accountMsg.includes("Gagal") ? "text-rose-400" : "text-emerald-400"}` }, AdminLayout.accountMsg) 
+              : null
+            )
           )
         )
 
