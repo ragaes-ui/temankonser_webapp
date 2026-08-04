@@ -46,6 +46,7 @@ const ConcertLayout = () => {
       // Masukkan balasan AI ke layar
       chatHistory.push({ role: "ai", text: res.reply });
     } catch (error) {
+      console.error("🚨 INI ERRORNYA MAS:", error);
       chatHistory.push({ role: "ai", text: "Duh, koneksi ke otak AI gue lagi gangguan nih." });
     } finally {
       isAiTyping = false;
