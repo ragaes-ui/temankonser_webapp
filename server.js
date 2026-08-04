@@ -2,10 +2,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bcrypt = require("bcryptjs"); // <--- Panggil Bcrypt
+const { GoogleGenerativeAI } = require("@google/generative-ai"); // <--- PANGGIL GEMINI
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Inisialisasi Gemini API (Kuncinya akan kita taruh di Vercel nanti)
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "KUNCI_KOSONG");
 
 // 1. KONEKSI MONGODB YANG AMAN UNTuk VERCEL SERVERLESS
 let isConnected = false;
@@ -130,6 +134,30 @@ app.put("/api/admin/settings", async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ success: false, message: "Terjadi kesalahan di server." });
+  }
+});
+
+// --- API CHATBOT GEMINI AI (BARU) ---
+app.post("/api/chat", async (req, res) => {
+  try {
+    const { pesan } = req.body;
+    
+    if (!process.env.GEMINI_API_KEY) {
+      return res.json({ reply: "Sistem AI belum di-setting oleh Admin (API Key belum ada)." });
+    }
+
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    // Prompt khusus agar Gemini bertingkah seperti asisten musik
+    const prompt = `Kamu adalah asisten AI gaul bernama 'Teman Konser Bot'. Tugasmu menjawab pertanyaan pengunjung web arsip dokumentasi konser. Jawablah dengan singkat, ramah, santai, dan gunakan bahasa anak muda / penikmat musik (gue/lu/bro/sis). Pertanyaan pengunjung: ${pesan}`;
+    
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    
+    res.json({ reply: response.text() });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ reply: "Waduh, otak AI gue lagi konslet nih bro, coba lagi nanti ya!" });
   }
 });
 

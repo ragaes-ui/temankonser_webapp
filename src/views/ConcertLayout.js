@@ -18,7 +18,39 @@ const ConcertLayout = () => {
   let isLoading = false;
   let previousId = null;
   let isOpen = false;
-  
+ // --- STATE UNTUK AI CHATBOT ---
+  let isChatOpen = false;
+  let chatMessage = "";
+  let isAiTyping = false;
+  let chatHistory = [
+    { role: "ai", text: "Halo bro! Gue asisten AI Teman Konser. Ada yang pengen ditanyain seputar web ini?" }
+  ];
+
+  const sendChatMessage = async (e) => {
+    e.preventDefault();
+    if (!chatMessage.trim()) return;
+
+    // Simpan pesan user ke layar
+    const userText = chatMessage;
+    chatHistory.push({ role: "user", text: userText });
+    chatMessage = "";
+    isAiTyping = true;
+    m.redraw(); // Update UI
+
+    try {
+      const res = await m.request({
+        method: "POST",
+        url: `${API_URL}/chat`,
+        body: { pesan: userText }
+      });
+      // Masukkan balasan AI ke layar
+      chatHistory.push({ role: "ai", text: res.reply });
+    } catch (error) {
+      chatHistory.push({ role: "ai", text: "Duh, koneksi ke otak AI gue lagi gangguan nih." });
+    } finally {
+      isAiTyping = false;
+    }
+  }; 
   // --- STATE UNTUK ANIMASI KETIK (TYPEWRITER) ---
   const words = ["Teman Konser Festival", "Ruang Arsip Digital", "Memori Area Moshpit"];
   let currentText = "";
@@ -293,7 +325,34 @@ view: () => {
                 )
             )
         ),
-
+// --- KOMPONEN AI CHATBOT (MENGAMBANG DI POJOK KANAN BAWAH) ---
+        m("div", { class: "fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans" },
+          isChatOpen ? m("div", { class: "bg-slate-800 border border-slate-600 rounded-2xl w-80 shadow-[0_0_30px_rgba(0,0,0,0.8)] mb-4 overflow-hidden flex flex-col animate-[fadeIn_0.2s_ease-out_1]" },
+            // Header Chat
+            m("div", { class: "bg-indigo-600 p-4 flex justify-between items-center text-white" },
+              m("span", { class: "font-bold flex items-center gap-2" }, "🤖 Teman Konser AI"),
+              m("button", { class: "hover:text-slate-300 font-bold", onclick: () => isChatOpen = false }, "✕")
+            ),
+            // Isi Chat (Layar)
+            m("div", { class: "p-4 h-72 overflow-y-auto flex flex-col gap-3 bg-slate-900/90 text-sm", id: "chat-box", onupdate: (vnode) => vnode.dom.scrollTop = vnode.dom.scrollHeight },
+              chatHistory.map(chat => 
+                m("div", { class: `p-3 max-w-[85%] rounded-xl shadow-md ${chat.role === 'ai' ? 'bg-slate-700 text-slate-200 self-start rounded-tl-none' : 'bg-indigo-500 text-white self-end rounded-tr-none'}` }, 
+                  chat.text
+                )
+              ),
+              isAiTyping ? m("div", { class: "text-slate-400 italic text-xs ml-2" }, "AI sedang mengetik...") : null
+            ),
+            // Kotak Ketik Pesan
+            m("form", { class: "flex p-3 bg-slate-800 border-t border-slate-700", onsubmit: sendChatMessage },
+              m("input", { class: "flex-grow bg-slate-900 border border-slate-600 rounded-lg p-2 text-white outline-none focus:border-indigo-500 text-sm", placeholder: "Tanya apa aja...", value: chatMessage, oninput: e => chatMessage = e.target.value }),
+              m("button", { type: "submit", class: "ml-3 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-bold text-sm transition-all" }, "➤")
+            )
+          ) : null,
+          // Tombol Toggle Buka Chat
+          m("button", { class: `bg-indigo-600 hover:bg-indigo-500 text-white w-14 h-14 rounded-full shadow-[0_0_20px_rgba(99,102,241,0.6)] text-2xl flex items-center justify-center transform transition-transform hover:scale-110 ${isChatOpen ? 'rotate-180 bg-rose-600 hover:bg-rose-500 shadow-rose-500/50' : ''}`, onclick: () => isChatOpen = !isChatOpen }, 
+            isChatOpen ? "✕" : "🤖"
+          )
+        ),
         // --- FOOTER SOSIAL MEDIA ---
         m("footer", { class: "w-full bg-slate-950/50 border-t border-slate-800 py-8 mt-12 text-center" },
           m("div", { class: "container mx-auto" },
