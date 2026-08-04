@@ -247,7 +247,21 @@ app.delete("/api/concerts/:id", async (req, res) => {
 
 // Kalau sebelumnya cuma begini:
 // app.listen(3000, () => console.log("Server running..."));
-
+// --- API UNTUK MENGINTIP DAFTAR MODEL GOOGLE ---
+app.get("/api/cek-model", async (req, res) => {
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`;
+    
+    // Karena di Node.js kita butuh dynamic import untuk fetch, kita panggil seperti ini
+    const fetch = (await import('node-fetch')).default || global.fetch;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: "Gagal mengintip server Google" });
+  }
+});
 // UBAH MENJADI SEPERTI INI UNTUK VERCEL:
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 3000;
