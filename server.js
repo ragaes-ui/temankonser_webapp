@@ -146,7 +146,7 @@ app.post("/api/tanya", async (req, res) => {
       return res.json({ reply: "Sistem AI belum di-setting oleh Admin (API Key belum ada)." });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     
     // Prompt khusus agar Gemini bertingkah seperti asisten musik
     const prompt = `Kamu adalah asisten AI gaul bernama 'Teman Konser Bot'. Tugasmu menjawab pertanyaan pengunjung web arsip dokumentasi konser. Jawablah dengan singkat, ramah, santai, dan gunakan bahasa anak muda / penikmat musik (gue/lu/bro/sis). Pertanyaan pengunjung: ${pesan}`;
