@@ -26,7 +26,7 @@ const ConcertLayout = () => {
     { role: "ai", text: "Halo bro! Gue asisten AI Teman Konser. Ada yang pengen ditanyain seputar web ini?" }
   ];
 
-  const sendChatMessage = async (e) => {
+const sendChatMessage = async (e) => {
     e.preventDefault();
     if (!chatMessage.trim()) return;
 
@@ -37,21 +37,25 @@ const ConcertLayout = () => {
     isAiTyping = true;
     m.redraw(); // Update UI
 
+    // --- KITA TANAM ALAMATNYA LANGSUNG DI SINI BIAR TIDAK HILANG ---
+    const alamatServer = window.location.hostname === "localhost" ? "http://localhost:3000/api" : "/api";
+
     try {
       const res = await m.request({
         method: "POST",
-        url: `${API_URL}/tanya`,
+        url: `${alamatServer}/tanya`, // Sesuaikan dengan kata "tanya" yang sudah mas buat
         body: { pesan: userText }
       });
+      
       // Masukkan balasan AI ke layar
       chatHistory.push({ role: "ai", text: res.reply });
     } catch (error) {
-      console.error("🚨 INI ERRORNYA MAS:", error);
+      console.error("🚨 INI ERRORNYA MAS:", error); 
       chatHistory.push({ role: "ai", text: "Duh, koneksi ke otak AI gue lagi gangguan nih." });
     } finally {
       isAiTyping = false;
     }
-  }; 
+  };
   // --- STATE UNTUK ANIMASI KETIK (TYPEWRITER) ---
   const words = ["Teman Konser Festival", "Ruang Arsip Digital", "Memori Area Moshpit"];
   let currentText = "";
