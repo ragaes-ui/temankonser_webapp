@@ -168,7 +168,7 @@ const AdminLayout = {
       return m("div", { class: "min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans" },
         m("div", { class: "bg-slate-800 p-8 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.5)] border border-slate-700 w-full max-w-md" },
           m("div", { class: "text-center mb-8" },
-            m("h1", { class: "text-3xl font-bold text-white tracking-tight" }, "Admin", m("span", { class: "text-indigo-500" }, "Panel"))
+            m("h1", { class: "text-3xl font-bold text-white tracking-tight" }, "Admin", m("span", { class: "text-indigo-500" }, "TemanKonser.fest"))
           ),
           m("form", { class: "flex flex-col gap-5", onsubmit: AdminLayout.handleLogin },
             m("div",
