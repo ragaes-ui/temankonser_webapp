@@ -119,8 +119,10 @@ const AdminLayout = {
       shortTitle: AdminLayout.formData.shortTitle,
       title: AdminLayout.formData.title,
       desc: AdminLayout.formData.desc,
-      gallery: AdminLayout.formData.galleryInput.split("\n").map(url => url.trim()).filter(url => url),
-      videos: AdminLayout.formData.videosInput.split("\n").map(url => url.trim()).filter(url => url)
+// KITA UBAH BAGIAN SPLIT-NYA DI DUA BARIS INI:
+      // /[\n,]+/ artinya: "Pecah teksnya setiap kali ketemu tombol Enter ATAU tanda koma"
+      gallery: AdminLayout.formData.galleryInput.split(/[\n,]+/).map(url => url.trim()).filter(url => url),
+      videos: AdminLayout.formData.videosInput.split(/[\n,]+/).map(url => url.trim()).filter(url => url)
     };
 
     try {
