@@ -12,20 +12,20 @@ const Navbar = () => {
         m("div", { class: "container mx-auto" },
           
           // --- BARIS UTAMA NAVBAR ---
-          m("div", { class: "flex justify-between items-center" },
+          // md:gap-6 HANYA aktif di laptop, di HP tidak ada gap (sama seperti kode asli mas)
+          m("div", { class: "flex justify-between items-center md:gap-6" },
             
-            // KODE BARU: Membungkus Logo dan Teks agar bersebelahan
-            m(m.route.Link, { href: "/home", class: "flex items-center gap-3 hover:opacity-80 transition-opacity" },
-              // Menampilkan Logo dari folder public
+            // md:flex-shrink-0 HANYA aktif di laptop untuk melindungi logo agar tidak menyusut
+            m(m.route.Link, { href: "/home", class: "flex items-center gap-3 hover:opacity-80 transition-opacity md:flex-shrink-0" },
               m("img", { 
                 src: "/temankonserlogo.png", 
                 alt: "Logo Teman Konser", 
-                class: "w-8 h-8 md:w-10 md:h-10 object-contain rounded-full" // Ukuran bisa disesuaikan
+                class: "w-8 h-8 md:w-10 md:h-10 object-contain rounded-full"
               }),
               m("div", { class: "font-bold text-lg md:text-xl tracking-wide text-white" }, "TemanKonser")
             ),
             
-            // TOMBOL HAMBURGER
+            // TOMBOL HAMBURGER - KEMBALI KE ASLI 100% (Tidak diotak-atik sama sekali)
             m("button", {
               class: "md:hidden text-slate-300 hover:text-white focus:outline-none p-2",
               onclick: () => { isMobileMenuOpen = !isMobileMenuOpen; }
@@ -37,8 +37,8 @@ const Navbar = () => {
               )
             ),
 
-            // MENU DESKTOP
-            m("div", { class: "hidden md:flex gap-2" },
+            // MENU DESKTOP - Ditambah fitur scroll horizontal khusus laptop
+            m("div", { class: "hidden md:flex gap-2 overflow-x-auto whitespace-nowrap pb-1 md:flex-1 custom-scrollbar" },
               m(m.route.Link, {
                 href: "/home",
                 class: `px-4 py-2 rounded-md text-sm font-medium transition ${
@@ -57,7 +57,7 @@ const Navbar = () => {
             )
           ),
 
-          // --- DROPDOWN MENU MOBILE ---
+          // --- DROPDOWN MENU MOBILE - KEMBALI KE ASLI 100% (Tidak diotak-atik) ---
           isMobileMenuOpen ? 
             m("div", { class: "md:hidden mt-4 flex flex-col gap-2 pb-2 border-t border-slate-800 pt-4 animate-[fadeIn_0.3s_ease-out_1]" },
               m(m.route.Link, {
