@@ -125,10 +125,8 @@ const ConcertLayout = () => {
 
       const hasVideos = activeConcert && activeConcert.videos && activeConcert.videos.length > 0;
       
-      // --- KREASI WARNA BARU YANG JAUH LEBIH ELEGAN ---
       const isDark = Settings.theme === "dark";
       
-      // Latar belakang gradient berlapis (tidak mati seperti pure black)
       const bgRoot = isDark 
         ? "bg-gradient-to-b from-slate-900 via-[#0a0f1c] to-black text-slate-200" 
         : "bg-gradient-to-br from-slate-50 via-white to-slate-100 text-slate-800";
@@ -136,7 +134,6 @@ const ConcertLayout = () => {
       const textHeading = isDark ? "text-white drop-shadow-md" : "text-slate-900";
       const textMuted = isDark ? "text-slate-400" : "text-slate-500";
       
-      // Kartu dengan efek Kaca (Glass) dan Glow tipis
       const bgCard = isDark 
         ? "bg-slate-800/40 backdrop-blur-sm border-slate-700/50 hover:bg-slate-800/70 hover:border-indigo-500/50 hover:shadow-[0_0_30px_rgba(99,102,241,0.2)]" 
         : "bg-white/80 backdrop-blur-sm border-slate-200 hover:bg-white hover:border-indigo-300 hover:shadow-xl";
@@ -163,9 +160,13 @@ const ConcertLayout = () => {
         
         m("main", { class: "container mx-auto p-4 md:p-8 flex-grow" },
           isLoading ? 
-            m("div", { class: "flex flex-col items-center justify-center mt-32 animate-[pulse_0.5s_ease-out_infinite]" },
-              m("div", { class: `w-12 h-12 border-4 ${isDark ? 'border-slate-800' : 'border-slate-300'} border-t-indigo-500 rounded-full animate-spin mb-4 shadow-lg` }),
-              m("p", { class: `${textMuted} font-medium tracking-widest` }, Settings.lang === "id" ? "MEMUAT..." : "LOADING...")
+            // --- LOADING STANDAR (SVG SPINNER BAWAAN) ---
+            m("div", { class: "flex flex-col items-center justify-center mt-40 mb-32" },
+              m("svg", { class: "animate-spin h-10 w-10 text-indigo-500 mb-4", xmlns: "http://www.w3.org/2000/svg", fill: "none", viewBox: "0 0 24 24" },
+                m("circle", { class: "opacity-25", cx: "12", cy: "12", r: "10", stroke: "currentColor", "stroke-width": "4" }),
+                m("path", { class: "opacity-75", fill: "currentColor", d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" })
+              ),
+              m("p", { class: `${textMuted} font-medium` }, Settings.lang === "id" ? "Memuat..." : "Loading...")
             )
           :
             m("div", { class: "animate-[fadeIn_0.5s_ease-out_1]" },
@@ -173,11 +174,8 @@ const ConcertLayout = () => {
                 
                 m("div", { class: "flex flex-col gap-20 mt-12 pb-16 items-center text-center" },
                   m("div", { class: "max-w-3xl mx-auto flex flex-col items-center gap-6 relative" },
-                    // Ornamen cahaya redup di belakang logo (Ambient Glow)
                     isDark ? m("div", { class: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" }) : null,
-                    
                     m("img", { src: "/temankonserlogo.png", alt: "Logo", class: "w-32 h-32 md:w-48 md:h-48 object-contain mx-auto drop-shadow-2xl mb-2 relative z-10" }),
-                    
                     m("h1", { class: `text-4xl md:text-5xl font-bold ${textHeading} tracking-tight min-h-[3rem] md:min-h-[4rem] flex items-center justify-center relative z-10` }, 
                       currentText,
                       m("span", { class: "text-indigo-500 animate-pulse font-light ml-1" }, "|") 
