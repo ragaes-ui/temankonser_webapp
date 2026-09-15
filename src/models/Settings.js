@@ -19,21 +19,21 @@ const Settings = {
     m.redraw(); // Paksa seluruh web merender ulang dengan warna baru!
   },
 
-  // 3. KAMUS BAHASA (Tambahkan semua kata-kata yang ada di web mas ke sini)
+// 3. KAMUS BAHASA
   kamus: {
     id: {
       beranda: "Beranda",
-      arsip_kosong: "Belum ada arsip foto.",
-      download: "Download Foto Ini",
-      login: "Masuk",
-      batal: "Batal"
+      judul_memori: "Memori",
+      sambutan: "Selamat datang di ruang arsip digital kita. Web ini dibuat khusus untuk mengabadikan setiap momen dan euforia yang kita rasakan bersama di area moshpit maupun tribun.",
+      petunjuk: "Silakan klik menu di atas untuk berpindah ke laman dokumentasi.",
+      highlight: "Highlight Perjalanan"
     },
     en: {
       beranda: "Home",
-      arsip_kosong: "No photo archives yet.",
-      download: "Download This Photo",
-      login: "Login",
-      batal: "Cancel"
+      judul_memori: "Memories",
+      sambutan: "Welcome to our digital archive room. This website was created specifically to capture every moment and euphoria we experienced together in the moshpit and the grandstands.",
+      petunjuk: "Please click the menu above to navigate to the documentation pages.",
+      highlight: "Journey Highlights"
     }
   },
 
