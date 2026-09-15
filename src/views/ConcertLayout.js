@@ -22,37 +22,6 @@ const ConcertLayout = () => {
   let isAiTyping = false;
   let chatHistory = [{ role: "ai", text: "Halo bro! Gue asisten AI Teman Konser. Ada yang pengen ditanyain seputar web ini?" }];
 
-  // --- STATE UNTUK API INFO KONSER MENDATANG ---
-  let upcomingConcerts = [];
-  let isFetchingConcerts = false;
-
-  // Fungsi penarik data dari API
-  const loadUpcomingConcerts = async () => {
-    if (upcomingConcerts.length > 0) return; // Mencegah load ulang jika data sudah ada
-    isFetchingConcerts = true;
-    m.redraw();
-
-    try {
-      // ⚠️ NANTI MAS TINGGAL HAPUS KOMENTAR BARIS DI BAWAH INI DAN GANTI URL-NYA KE API ASLI
-      // const res = await m.request({ method: "GET", url: "https://api.domain-tiket-asli.com/events" });
-      
-      // -- SIMULASI: Delay 1.5 detik seolah-olah sedang menarik data dari server --
-      await new Promise(r => setTimeout(r, 1500));
-      
-      // -- SIMULASI: Data yang didapat dari API (Format JSON) --
-      upcomingConcerts = [
-        { id: 1, title: "Pestapora 2026", lineup: "Hindia, Lomba Sihir, .Feast", date: "25-27 September 2026", venue: "Gambir Expo Kemayoran, Jakarta", image: "https://placehold.co/600x400/312e81/ffffff?text=Pestapora+2026", ticketUrl: "#" },
-        { id: 2, title: "Synchronize Fest", lineup: "The Changcuters, Tipe-X, Perunggu", date: "4-6 September 2026", venue: "Gambir Expo Kemayoran, Jakarta", image: "https://placehold.co/600x400/4c1d95/ffffff?text=Synchronize+Fest", ticketUrl: "#" },
-        { id: 3, title: "We The Fest", lineup: "Pamungkas, Fourtwnty, Biru Baru", date: "17-19 Juli 2026", venue: "GBK Sports Complex, Jakarta", image: "https://placehold.co/600x400/0f172a/ffffff?text=We+The+Fest", ticketUrl: "#" }
-      ];
-    } catch (error) {
-      console.error("Gagal menarik data konser:", error);
-    } finally {
-      isFetchingConcerts = false;
-      m.redraw(); // Update layar
-    }
-  };
-
   const sendChatMessage = async (e) => {
     e.preventDefault();
     if (!chatMessage.trim()) return;
@@ -117,12 +86,8 @@ const ConcertLayout = () => {
   return {
     oninit: async () => {
       if (ConcertState.list.length === 0) await ConcertState.loadConcerts();
-      
       previousId = m.route.param("id") || "home";
       ConcertState.setConcert(previousId);
-
-      // Tarik data API jika ada di halaman Home
-      if (previousId === "home") loadUpcomingConcerts(); 
 
       const loader = document.getElementById("global-loader");
       if (loader) {
@@ -139,12 +104,6 @@ const ConcertLayout = () => {
     onupdate: () => {
       const currentId = m.route.param("id") || "home";
       ConcertState.setConcert(currentId);
-      
-      // Jika pindah kembali ke beranda dan API belum ditarik, tarik sekarang
-      if (currentId === "home" && upcomingConcerts.length === 0 && !isFetchingConcerts) {
-        loadUpcomingConcerts();
-      }
-
       if (currentId !== previousId) {
         previousId = currentId;
         isOpen = false; 
@@ -185,9 +144,6 @@ const ConcertLayout = () => {
           : "Welcome to our digital archive room. This website was created specifically to capture every moment and euphoria we experienced together in the moshpit and the grandstands.",
         hint: Settings.lang === "id" ? "Silakan klik menu di atas untuk berpindah ke laman dokumentasi." : "Please click the menu above to navigate to the documentation pages.",
         highlight: Settings.lang === "id" ? "Highlight Perjalanan" : "Journey Highlights",
-        apiTitle: Settings.lang === "id" ? "Jadwal Konser Mendatang" : "Upcoming Concerts",
-        apiDesc: Settings.lang === "id" ? "Temukan event seru berikutnya dan siapkan energimu!" : "Find the next exciting event and prepare your energy!",
-        buyTicket: Settings.lang === "id" ? "Cek Tiket" : "Check Tickets",
         stats: Settings.lang === "id" 
           ? [{ t: "Total Gigs", v: "15+", d: "Konser & Festival" }, { t: "Koleksi", v: "300+", d: "Foto & Video Memori" }, { t: "Solidaritas", v: "100%", d: "Selalu Sing-along" }]
           : [{ t: "Total Gigs", v: "15+", d: "Concerts & Festivals" }, { t: "Collection", v: "300+", d: "Photo & Video Memories" }, { t: "Solidarity", v: "100%", d: "Always Sing-along" }],
@@ -204,9 +160,12 @@ const ConcertLayout = () => {
         
         m("main", { class: "container mx-auto p-4 md:p-8 flex-grow" },
           isLoading ? 
+            // --- LOADING ANIMASI TK MUTER ---
             m("div", { class: "flex flex-col items-center justify-center mt-40 mb-32" },
               m("div", { class: "relative flex items-center justify-center mb-6" },
+                // Cincin berputar
                 m("div", { class: `w-20 h-20 border-4 ${isDark ? 'border-slate-800' : 'border-slate-300'} border-t-indigo-500 border-b-purple-500 rounded-full animate-spin shadow-[0_0_20px_rgba(99,102,241,0.3)]` }),
+                // Teks TK diam di tengah
                 m("div", { class: "absolute text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-purple-500 tracking-widest drop-shadow-md" }, "TK")
               ),
               m("p", { class: `${textMuted} font-bold tracking-[0.5em] text-xs uppercase animate-pulse` }, Settings.lang === "id" ? "MEMUAT" : "LOADING")
@@ -215,8 +174,7 @@ const ConcertLayout = () => {
             m("div", { class: "animate-[fadeIn_0.5s_ease-out_1]" },
               currentId === "home" ? 
                 
-                m("div", { class: "flex flex-col gap-24 mt-12 pb-16 items-center text-center" },
-                  // HEADER
+                m("div", { class: "flex flex-col gap-20 mt-12 pb-16 items-center text-center" },
                   m("div", { class: "max-w-3xl mx-auto flex flex-col items-center gap-6 relative" },
                     isDark ? m("div", { class: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" }) : null,
                     m("img", { src: "/temankonserlogo.png", alt: "Logo", class: "w-32 h-32 md:w-48 md:h-48 object-contain mx-auto drop-shadow-2xl mb-2 relative z-10" }),
@@ -229,7 +187,6 @@ const ConcertLayout = () => {
                     m("p", { class: `text-md ${isDark ? 'text-slate-500' : 'text-slate-500'}` }, t.hint)
                   ),
 
-                  // STATISTIK
                   m("div", { class: "w-full max-w-4xl mx-auto relative z-10" },
                     m("h2", { class: `text-2xl font-bold ${textHeading} mb-10 tracking-wide` }, t.highlight),
                     m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
@@ -258,64 +215,6 @@ const ConcertLayout = () => {
                         )
                       )
                     )
-                  ),
-
-                  // --- SECTION API KONSER MENDATANG ---
-                  m("div", { class: "w-full max-w-5xl mx-auto text-left relative z-10 border-t border-slate-700/30 pt-16" },
-                    m("div", { class: "flex flex-col md:flex-row md:justify-between md:items-end mb-10 gap-4" },
-                      m("div", {},
-                        m("h2", { class: `text-2xl md:text-3xl font-bold ${textHeading} tracking-wide` }, t.apiTitle),
-                        m("p", { class: `mt-2 ${textMuted}` }, t.apiDesc)
-                      ),
-                      m("div", { class: "flex items-center gap-2" },
-                        m("span", { class: "relative flex h-3 w-3" },
-                          m("span", { class: "animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" }),
-                          m("span", { class: "relative inline-flex rounded-full h-3 w-3 bg-rose-500" })
-                        ),
-                        m("span", { class: `text-xs font-bold ${isDark ? 'text-rose-400' : 'text-rose-600'} uppercase tracking-widest` }, "Live API")
-                      )
-                    ),
-
-                    // Loading Data API
-                    isFetchingConcerts ? 
-                      m("div", { class: "flex justify-center items-center py-20" },
-                        m("div", { class: "w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" })
-                      )
-                    : upcomingConcerts.length > 0 ?
-                      // Grid List Konser
-                      m("div", { class: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" },
-                        upcomingConcerts.map(concert => 
-                          m("div", { class: `${bgCard} rounded-3xl overflow-hidden flex flex-col group border transition-all duration-300` },
-                            // Gambar Event
-                            m("div", { class: "h-48 overflow-hidden relative" },
-                              m("div", { class: "absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10" }),
-                              m("img", { src: concert.image, alt: concert.title, class: "w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" })
-                            ),
-                            // Info Event
-                            m("div", { class: "p-6 flex-grow flex flex-col relative z-20" },
-                              m("h3", { class: `text-xl font-bold ${textHeading} mb-1 line-clamp-1` }, concert.title),
-                              m("p", { class: `text-xs font-medium text-indigo-400 mb-4 line-clamp-1` }, concert.lineup),
-                              
-                              m("div", { class: `flex items-start gap-3 text-sm ${textMuted} mb-2` },
-                                m("span", { class: "mt-0.5" }, "📅"), m("span", concert.date)
-                              ),
-                              m("div", { class: `flex items-start gap-3 text-sm ${textMuted} mb-6` },
-                                m("span", { class: "mt-0.5" }, "📍"), m("span", concert.venue)
-                              ),
-                              
-                              // Tombol Beli / Cek Tiket
-                              m("div", { class: "mt-auto" },
-                                m("a", { 
-                                  href: concert.ticketUrl, 
-                                  class: `block w-full text-center ${isDark ? 'bg-indigo-500/20 hover:bg-indigo-600 text-indigo-300' : 'bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white'} hover:text-white border ${isDark ? 'border-indigo-500/30' : 'border-indigo-200 hover:border-transparent'} py-3 rounded-xl font-bold transition-all duration-300` 
-                                }, t.buyTicket)
-                              )
-                            )
-                          )
-                        )
-                      )
-                    : 
-                      m("p", { class: "text-center text-slate-500 py-12" }, "Tidak ada jadwal konser yang tersedia.")
                   )
                 )
 
