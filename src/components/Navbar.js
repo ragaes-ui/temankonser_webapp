@@ -2,15 +2,29 @@ import m from "mithril";
 import ConcertState from "../models/ConcertState.js";
 import Settings from "../models/Settings.js"; 
 
+// --- KOMPONEN BENDERA INDONESIA BULAT ---
+const FlagID = m("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", class: "w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-slate-400/30 flex-shrink-0 shadow-sm" },
+  m("rect", { width: "512", height: "256", fill: "#ce1126" }),
+  m("rect", { y: "256", width: "512", height: "256", fill: "#f8f9fa" })
+);
+
+// --- KOMPONEN BENDERA INGGRIS (UK) BULAT ---
+const FlagEN = m("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", class: "w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-slate-400/30 flex-shrink-0 shadow-sm" },
+  m("rect", { width: "512", height: "512", fill: "#012169" }),
+  m("path", { fill: "#fff", d: "M512 0v64L314 256l198 192v64h-64L256 314 58 512H0v-64l198-192L0 64V0h64l198 192L448 0h64z" }),
+  m("path", { fill: "#c8102e", d: "M164 256L0 90v42l132 124zm184 0L512 90v42L380 256zM0 422v-42l132-124 32 30zm512 0v-42L380 256l-32 30z" }),
+  m("path", { fill: "#fff", d: "M176 0v512h160V0zM0 176v160h512V176z" }),
+  m("path", { fill: "#c8102e", d: "M216 0v512h80V0zM0 216v80h512v-80z" })
+);
+
 const Navbar = () => {
   let isMenuOpen = false;
-  let isLangMenuOpen = false; // State baru untuk mengontrol Dropdown Bahasa
+  let isLangMenuOpen = false; 
 
-  // Fungsi khusus untuk mengubah bahasa dari dropdown
   const setLanguage = (newLang) => {
     Settings.lang = newLang;
     localStorage.setItem("lang", newLang);
-    isLangMenuOpen = false; // Tutup menu setelah memilih
+    isLangMenuOpen = false; 
     m.redraw();
   };
 
@@ -37,13 +51,13 @@ const Navbar = () => {
               m("div", { class: `font-bold text-lg md:text-xl tracking-wide ${textNav}` }, "TemanKonser")
             ),
             
-            // --- KELOMPOK TOMBOL (Sesuai Referensi Gambar) ---
-            m("div", { class: "flex items-center gap-3 md:gap-4" },
+            // --- KELOMPOK TOMBOL ---
+            m("div", { class: "flex items-center gap-3 md:gap-4 relative" },
               
-              // 1. TOMBOL TEMA (Ikon Garis SVG Persis Seperti Gambar)
+              // 1. TOMBOL TEMA
               m("button", {
                 class: `flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 ${
-                  isDark ? 'border-zinc-700 bg-zinc-800/30 hover:bg-zinc-700/60 text-amber-400' : 'border-gray-300 bg-white hover:bg-gray-100 text-amber-500'
+                  isDark ? 'border-zinc-700 bg-zinc-800/40 hover:bg-zinc-700/80 text-amber-400' : 'border-gray-300 bg-white hover:bg-gray-100 text-amber-500'
                 }`,
                 onclick: (e) => { e.preventDefault(); Settings.toggleTheme(); },
                 title: "Ganti Tema"
@@ -57,55 +71,65 @@ const Navbar = () => {
                   )
               ),
 
-              // 2. TOMBOL BAHASA & DROPDOWN (Persis Seperti Gambar)
+              // 2. KELOMPOK BAHASA
               m("div", { class: "relative" }, [
-                // Tombol Pemicu
+                
+                // Tombol Pemicu Bahasa
                 m("button", {
-                  class: `flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-300 ${
-                    isDark ? 'border-zinc-700 bg-zinc-800/30 hover:bg-zinc-700/60 text-white' : 'border-gray-300 bg-white hover:bg-gray-100 text-slate-800'
+                  class: `flex items-center gap-2 pl-2 pr-3 py-1.5 md:py-2 rounded-full border transition-all duration-300 ${
+                    isDark ? 'border-zinc-700 bg-zinc-800/40 hover:bg-zinc-700/80 text-white' : 'border-gray-300 bg-white hover:bg-gray-100 text-slate-800'
                   }`,
                   onclick: (e) => { e.preventDefault(); isLangMenuOpen = !isLangMenuOpen; }
                 }, [
-                  m("span", { class: "text-lg leading-none" }, Settings.lang === "id" ? "🇮🇩" : "🇬🇧"),
+                  Settings.lang === "id" ? FlagID : FlagEN, // Memanggil Bendera Gambar Asli
                   m("span", { class: "font-bold text-sm" }, Settings.lang === "id" ? "ID" : "EN"),
-                  m("svg", { class: `w-4 h-4 transition-transform duration-300 ${isLangMenuOpen ? 'rotate-180' : ''}`, fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
+                  m("svg", { class: `w-4 h-4 text-gray-400 transition-transform duration-300 ${isLangMenuOpen ? 'rotate-180' : ''}`, fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
                     m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M19 9l-7 7-7-7" })
                   )
                 ]),
 
-                // Menu Dropdown Bahasa (Melayang di bawah tombol)
+                // --- JARING TAK KASAT MATA (Klik dimana saja untuk tutup dropdown) ---
+                isLangMenuOpen ? m("div", {
+                  class: "fixed inset-0 z-40 cursor-default", 
+                  onclick: (e) => { 
+                    e.stopPropagation(); 
+                    isLangMenuOpen = false; 
+                  }
+                }) : null,
+
+                // --- MENU DROPDOWN BAHASA ---
                 isLangMenuOpen ? m("div", {
                   class: `absolute top-full mt-3 right-0 w-44 rounded-2xl border shadow-xl overflow-hidden z-50 animate-[fadeIn_0.2s_ease-out_1] ${
                     isDark ? 'bg-[#1E293B] border-slate-700 text-white shadow-black/50' : 'bg-white border-gray-200 text-slate-800 shadow-indigo-900/10'
                   }`
                 }, [
-                  // Opsi Indonesia
+                  // Pilihan Indonesia
                   m("button", {
                     class: `w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
                       isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'
                     } ${Settings.lang === "id" ? (isDark ? 'bg-slate-800' : 'bg-indigo-50') : ''}`,
                     onclick: () => setLanguage("id")
                   }, [
-                    m("span", { class: "text-xl leading-none" }, "🇮🇩"),
+                    FlagID,
                     m("span", { class: "font-medium text-[15px]" }, "Indonesia")
                   ]),
-                  // Opsi English
+                  // Pilihan English
                   m("button", {
                     class: `w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
                       isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'
                     } ${Settings.lang === "en" ? (isDark ? 'bg-slate-800' : 'bg-indigo-50') : ''}`,
                     onclick: () => setLanguage("en")
                   }, [
-                    m("span", { class: "text-xl leading-none" }, "🇬🇧"),
+                    FlagEN,
                     m("span", { class: "font-medium text-[15px]" }, "English")
                   ])
                 ]) : null
               ]),
 
-              // 3. TOMBOL MENU EVENT (TITIK TIGA)
+              // 3. TOMBOL MENU TITIK TIGA
               m("button", {
                 class: `flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 ${
-                  isDark ? 'border-zinc-700 bg-zinc-800/30 hover:bg-zinc-700/60 text-white' : 'border-gray-300 bg-white hover:bg-gray-100 text-slate-800'
+                  isDark ? 'border-zinc-700 bg-zinc-800/40 hover:bg-zinc-700/80 text-white' : 'border-gray-300 bg-white hover:bg-gray-100 text-slate-800'
                 }`,
                 onclick: () => { isMenuOpen = !isMenuOpen; }
               }, 
@@ -118,7 +142,7 @@ const Navbar = () => {
             )
           ),
 
-          // --- DROPDOWN MENU UTAMA ---
+          // --- DROPDOWN MENU EVENT ---
           isMenuOpen ? 
             m("div", { class: `mt-4 flex flex-col gap-2 pb-2 border-t ${isDark ? 'border-slate-800/50' : 'border-slate-200'} pt-4` },
               m(m.route.Link, {
