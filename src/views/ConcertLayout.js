@@ -16,6 +16,9 @@ const ConcertLayout = () => {
   let previousId = null;
   let isOpen = false;
   
+  // --- OBAT ANTI-HILANG: Menyimpan status animasi kartu ---
+  let animatedStats = {}; 
+  
   let isChatOpen = false;
   let chatMessage = "";
   let isAiTyping = false;
@@ -126,9 +129,9 @@ const ConcertLayout = () => {
       
       // --- PENYETELAN WARNA MURNI HITAM & TERANG ---
       const isDark = Settings.theme === "dark";
-      // bg-black memastikan latarnya benar-benar hitam pekat
+      // bg-black memastikan latarnya benar-benar HITAM PEKAT (Bukan biru/slate)
       const bgRoot = isDark ? "bg-black text-gray-200" : "bg-gray-50 text-gray-900";
-      // Memaksa teks jadi hitam (text-black) saat di mode terang
+      // Memaksa teks judul jadi hitam saat mode terang
       const textHeading = isDark ? "text-white" : "text-black";
       const textMuted = isDark ? "text-zinc-400" : "text-gray-600";
       const bgCard = isDark ? "bg-zinc-900 border-zinc-800 hover:bg-zinc-800" : "bg-white border-gray-200 hover:bg-gray-50 shadow-md";
@@ -180,13 +183,17 @@ const ConcertLayout = () => {
                     m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
                       t.stats.map((stat, index) => 
                         m("div", { 
-                          class: `${bgCard} border rounded-xl p-8 flex flex-col items-center justify-center transition-all duration-700 ease-out transform translate-y-12 opacity-0 hover:-translate-y-2 cursor-default`,
+                          // KUNCI SOLUSI BUG: Kelasnya dikunci pakai state animatedStats, bukan manual lewat DOM
+                          class: `${bgCard} border rounded-xl p-8 flex flex-col items-center justify-center transition-all duration-700 ease-out transform ${
+                            animatedStats[index] ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
+                          } hover:-translate-y-2 cursor-default`,
                           oncreate: (vnode) => {
+                            if (animatedStats[index]) return; // Cegah reset jika sudah muncul
                             const observer = new IntersectionObserver((entries) => {
                               if (entries[0].isIntersecting) {
                                 setTimeout(() => {
-                                  vnode.dom.classList.remove("translate-y-12", "opacity-0");
-                                  vnode.dom.classList.add("translate-y-0", "opacity-100");
+                                  animatedStats[index] = true;
+                                  m.redraw(); // Biarkan Mithril yang mengurus tampilannya
                                 }, index * 250 + 100); 
                                 observer.unobserve(vnode.dom);
                               }
