@@ -160,13 +160,15 @@ const ConcertLayout = () => {
         
         m("main", { class: "container mx-auto p-4 md:p-8 flex-grow" },
           isLoading ? 
-            // --- LOADING STANDAR (SVG SPINNER BAWAAN) ---
+            // --- LOADING ANIMASI TK MUTER ---
             m("div", { class: "flex flex-col items-center justify-center mt-40 mb-32" },
-              m("svg", { class: "animate-spin h-10 w-10 text-indigo-500 mb-4", xmlns: "http://www.w3.org/2000/svg", fill: "none", viewBox: "0 0 24 24" },
-                m("circle", { class: "opacity-25", cx: "12", cy: "12", r: "10", stroke: "currentColor", "stroke-width": "4" }),
-                m("path", { class: "opacity-75", fill: "currentColor", d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" })
+              m("div", { class: "relative flex items-center justify-center mb-6" },
+                // Cincin berputar
+                m("div", { class: `w-20 h-20 border-4 ${isDark ? 'border-slate-800' : 'border-slate-300'} border-t-indigo-500 border-b-purple-500 rounded-full animate-spin shadow-[0_0_20px_rgba(99,102,241,0.3)]` }),
+                // Teks TK diam di tengah
+                m("div", { class: "absolute text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-purple-500 tracking-widest drop-shadow-md" }, "TK")
               ),
-              m("p", { class: `${textMuted} font-medium` }, Settings.lang === "id" ? "Memuat..." : "Loading...")
+              m("p", { class: `${textMuted} font-bold tracking-[0.5em] text-xs uppercase animate-pulse` }, Settings.lang === "id" ? "MEMUAT" : "LOADING")
             )
           :
             m("div", { class: "animate-[fadeIn_0.5s_ease-out_1]" },
