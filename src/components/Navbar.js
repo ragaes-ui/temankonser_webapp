@@ -2,14 +2,13 @@ import m from "mithril";
 import ConcertState from "../models/ConcertState.js";
 import Settings from "../models/Settings.js"; 
 
-// --- KOMPONEN BENDERA INDONESIA BULAT ---
-const FlagID = m("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", class: "w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-slate-400/30 flex-shrink-0 shadow-sm" },
+// --- PERBAIKAN: Ubah menjadi Fungsi () agar bisa di-refresh ---
+const FlagID = () => m("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", class: "w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-slate-400/30 flex-shrink-0 shadow-sm" },
   m("rect", { width: "512", height: "256", fill: "#ce1126" }),
   m("rect", { y: "256", width: "512", height: "256", fill: "#f8f9fa" })
 );
 
-// --- KOMPONEN BENDERA INGGRIS (UK) BULAT ---
-const FlagEN = m("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", class: "w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-slate-400/30 flex-shrink-0 shadow-sm" },
+const FlagEN = () => m("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", class: "w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-slate-400/30 flex-shrink-0 shadow-sm" },
   m("rect", { width: "512", height: "512", fill: "#012169" }),
   m("path", { fill: "#fff", d: "M512 0v64L314 256l198 192v64h-64L256 314 58 512H0v-64l198-192L0 64V0h64l198 192L448 0h64z" }),
   m("path", { fill: "#c8102e", d: "M164 256L0 90v42l132 124zm184 0L512 90v42L380 256zM0 422v-42l132-124 32 30zm512 0v-42L380 256l-32 30z" }),
@@ -51,7 +50,7 @@ const Navbar = () => {
               m("div", { class: `font-bold text-lg md:text-xl tracking-wide ${textNav}` }, "TemanKonser")
             ),
             
-            // --- KELOMPOK TOMBOL ---
+            // KELOMPOK TOMBOL
             m("div", { class: "flex items-center gap-3 md:gap-4 relative" },
               
               // 1. TOMBOL TEMA
@@ -81,14 +80,15 @@ const Navbar = () => {
                   }`,
                   onclick: (e) => { e.preventDefault(); isLangMenuOpen = !isLangMenuOpen; }
                 }, [
-                  Settings.lang === "id" ? FlagID : FlagEN, // Memanggil Bendera Gambar Asli
+                  // MANTRA SAKTI: Panggil fungsinya pakai ()
+                  Settings.lang === "id" ? FlagID() : FlagEN(), 
                   m("span", { class: "font-bold text-sm" }, Settings.lang === "id" ? "ID" : "EN"),
                   m("svg", { class: `w-4 h-4 text-gray-400 transition-transform duration-300 ${isLangMenuOpen ? 'rotate-180' : ''}`, fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
                     m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M19 9l-7 7-7-7" })
                   )
                 ]),
 
-                // --- JARING TAK KASAT MATA (Klik dimana saja untuk tutup dropdown) ---
+                // JARING TAK KASAT MATA
                 isLangMenuOpen ? m("div", {
                   class: "fixed inset-0 z-40 cursor-default", 
                   onclick: (e) => { 
@@ -97,30 +97,28 @@ const Navbar = () => {
                   }
                 }) : null,
 
-                // --- MENU DROPDOWN BAHASA ---
+                // MENU DROPDOWN BAHASA
                 isLangMenuOpen ? m("div", {
                   class: `absolute top-full mt-3 right-0 w-44 rounded-2xl border shadow-xl overflow-hidden z-50 animate-[fadeIn_0.2s_ease-out_1] ${
                     isDark ? 'bg-[#1E293B] border-slate-700 text-white shadow-black/50' : 'bg-white border-gray-200 text-slate-800 shadow-indigo-900/10'
                   }`
                 }, [
-                  // Pilihan Indonesia
                   m("button", {
                     class: `w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
                       isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'
                     } ${Settings.lang === "id" ? (isDark ? 'bg-slate-800' : 'bg-indigo-50') : ''}`,
                     onclick: () => setLanguage("id")
                   }, [
-                    FlagID,
+                    FlagID(), // Panggil fungsi pakai ()
                     m("span", { class: "font-medium text-[15px]" }, "Indonesia")
                   ]),
-                  // Pilihan English
                   m("button", {
                     class: `w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
                       isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'
                     } ${Settings.lang === "en" ? (isDark ? 'bg-slate-800' : 'bg-indigo-50') : ''}`,
                     onclick: () => setLanguage("en")
                   }, [
-                    FlagEN,
+                    FlagEN(), // Panggil fungsi pakai ()
                     m("span", { class: "font-medium text-[15px]" }, "English")
                   ])
                 ]) : null
