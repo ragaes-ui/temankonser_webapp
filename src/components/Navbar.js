@@ -4,24 +4,27 @@ import Settings from "../models/Settings.js";
 
 const Navbar = () => {
   let isMenuOpen = false;
+  let isLangMenuOpen = false; // State baru untuk mengontrol Dropdown Bahasa
+
+  // Fungsi khusus untuk mengubah bahasa dari dropdown
+  const setLanguage = (newLang) => {
+    Settings.lang = newLang;
+    localStorage.setItem("lang", newLang);
+    isLangMenuOpen = false; // Tutup menu setelah memilih
+    m.redraw();
+  };
 
   return {
     view: () => {
       const currentId = m.route.param("id");
       const isDark = Settings.theme === "dark";
       
-      // Efek kaca untuk background utama Navbar
       const bgNav = isDark 
         ? "bg-slate-950/70 backdrop-blur-xl border-slate-800/50" 
         : "bg-white/70 backdrop-blur-xl border-gray-200 shadow-sm";
       const textNav = isDark ? "text-white" : "text-slate-900";
       const bgHover = isDark ? "hover:bg-slate-800/50" : "hover:bg-gray-100/50";
       const bgActive = isDark ? "bg-indigo-500/20 text-indigo-400 font-bold border border-indigo-500/30" : "bg-indigo-50 text-indigo-700 font-bold";
-
-      // --- KREASI LIQUID GLASS UNTUK SEMUA TOMBOL ---
-      const glassBtnClass = isDark
-        ? "bg-slate-800/40 backdrop-blur-lg border border-slate-600/40 shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:bg-slate-700/60 hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:-translate-y-0.5 text-slate-200 transition-all duration-300 ease-out"
-        : "bg-white/50 backdrop-blur-lg border border-white/80 shadow-[0_4px_16px_rgba(99,102,241,0.15)] hover:bg-white/90 hover:border-white hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:-translate-y-0.5 text-slate-700 transition-all duration-300 ease-out";
 
       return m("nav", { class: `${bgNav} p-4 border-b sticky top-0 z-50 transition-all duration-500` },
         m("div", { class: "container mx-auto" },
@@ -34,42 +37,92 @@ const Navbar = () => {
               m("div", { class: `font-bold text-lg md:text-xl tracking-wide ${textNav}` }, "TemanKonser")
             ),
             
-            // KELOMPOK TOMBOL (Sekarang semua pakai class Liquid Glass)
-            m("div", { class: "flex items-center gap-2 md:gap-3" },
+            // --- KELOMPOK TOMBOL (Sesuai Referensi Gambar) ---
+            m("div", { class: "flex items-center gap-3 md:gap-4" },
               
-              // TOMBOL BAHASA (ID / EN) - Bentuk Pil Bulat
+              // 1. TOMBOL TEMA (Ikon Garis SVG Persis Seperti Gambar)
               m("button", {
-                class: `px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-extrabold rounded-full ${glassBtnClass} flex items-center justify-center`,
-                onclick: (e) => { e.preventDefault(); Settings.toggleLang(); }
-              }, Settings.lang === "id" ? "🇮🇩 ID" : "🇬🇧 EN"),
-
-              // TOMBOL TEMA (GELAP / TERANG) - Bentuk Bulat Sempurna
-              m("button", {
-                class: `p-2 md:p-2.5 rounded-full ${glassBtnClass} flex items-center justify-center w-9 h-9 md:w-11 md:h-11`,
+                class: `flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 ${
+                  isDark ? 'border-zinc-700 bg-zinc-800/30 hover:bg-zinc-700/60 text-amber-400' : 'border-gray-300 bg-white hover:bg-gray-100 text-amber-500'
+                }`,
                 onclick: (e) => { e.preventDefault(); Settings.toggleTheme(); },
                 title: "Ganti Tema"
-              }, isDark ? m("span", { class: "text-lg md:text-xl block" }, "☀️") : m("span", { class: "text-lg md:text-xl block" }, "🌙")),
+              }, 
+                isDark 
+                ? m("svg", { class: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" }, 
+                    m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" })
+                  )
+                : m("svg", { class: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
+                    m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" })
+                  )
+              ),
 
-              // TOMBOL TITIK TIGA - Bentuk Bulat Sempurna
+              // 2. TOMBOL BAHASA & DROPDOWN (Persis Seperti Gambar)
+              m("div", { class: "relative" }, [
+                // Tombol Pemicu
+                m("button", {
+                  class: `flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-300 ${
+                    isDark ? 'border-zinc-700 bg-zinc-800/30 hover:bg-zinc-700/60 text-white' : 'border-gray-300 bg-white hover:bg-gray-100 text-slate-800'
+                  }`,
+                  onclick: (e) => { e.preventDefault(); isLangMenuOpen = !isLangMenuOpen; }
+                }, [
+                  m("span", { class: "text-lg leading-none" }, Settings.lang === "id" ? "🇮🇩" : "🇬🇧"),
+                  m("span", { class: "font-bold text-sm" }, Settings.lang === "id" ? "ID" : "EN"),
+                  m("svg", { class: `w-4 h-4 transition-transform duration-300 ${isLangMenuOpen ? 'rotate-180' : ''}`, fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
+                    m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M19 9l-7 7-7-7" })
+                  )
+                ]),
+
+                // Menu Dropdown Bahasa (Melayang di bawah tombol)
+                isLangMenuOpen ? m("div", {
+                  class: `absolute top-full mt-3 right-0 w-44 rounded-2xl border shadow-xl overflow-hidden z-50 animate-[fadeIn_0.2s_ease-out_1] ${
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white shadow-black/50' : 'bg-white border-gray-200 text-slate-800 shadow-indigo-900/10'
+                  }`
+                }, [
+                  // Opsi Indonesia
+                  m("button", {
+                    class: `w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+                      isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'
+                    } ${Settings.lang === "id" ? (isDark ? 'bg-slate-800' : 'bg-indigo-50') : ''}`,
+                    onclick: () => setLanguage("id")
+                  }, [
+                    m("span", { class: "text-xl leading-none" }, "🇮🇩"),
+                    m("span", { class: "font-medium text-[15px]" }, "Indonesia")
+                  ]),
+                  // Opsi English
+                  m("button", {
+                    class: `w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+                      isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'
+                    } ${Settings.lang === "en" ? (isDark ? 'bg-slate-800' : 'bg-indigo-50') : ''}`,
+                    onclick: () => setLanguage("en")
+                  }, [
+                    m("span", { class: "text-xl leading-none" }, "🇬🇧"),
+                    m("span", { class: "font-medium text-[15px]" }, "English")
+                  ])
+                ]) : null
+              ]),
+
+              // 3. TOMBOL MENU EVENT (TITIK TIGA)
               m("button", {
-                class: `p-2 md:p-2.5 rounded-full ${glassBtnClass} flex items-center justify-center w-9 h-9 md:w-11 md:h-11`,
+                class: `flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 ${
+                  isDark ? 'border-zinc-700 bg-zinc-800/30 hover:bg-zinc-700/60 text-white' : 'border-gray-300 bg-white hover:bg-gray-100 text-slate-800'
+                }`,
                 onclick: () => { isMenuOpen = !isMenuOpen; }
               }, 
-                m("svg", { class: "w-5 h-5 md:w-6 md:h-6", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
+                m("svg", { class: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
                   isMenuOpen 
-                  ? m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2.5, d: "M6 18L18 6M6 6l12 12" })
-                  : m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2.5, d: "M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" })
+                  ? m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
+                  : m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" })
                 )
               )
             )
           ),
 
-          // DROPDOWN MENU
+          // --- DROPDOWN MENU UTAMA ---
           isMenuOpen ? 
             m("div", { class: `mt-4 flex flex-col gap-2 pb-2 border-t ${isDark ? 'border-slate-800/50' : 'border-slate-200'} pt-4` },
               m(m.route.Link, {
                 href: "/home",
-                // Menu dropdown juga disesuaikan biar ujungnya lebih melengkung (rounded-2xl)
                 class: `px-4 py-3 rounded-2xl text-base font-medium transition text-center ${currentId === "home" ? bgActive : bgHover} ${isDark ? 'text-slate-300' : 'text-slate-800'}`,
                 onclick: () => { isMenuOpen = false; } 
               }, Settings.t("beranda")), 
