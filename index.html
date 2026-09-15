@@ -8,22 +8,50 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
   
-  <!-- ================= SPASH SCREEN LOADING ================= -->
-  <div id="global-loader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-700 ease-out">
-    <div class="relative flex items-center justify-center">
-      <!-- Cincin Berputar -->
-      <div class="w-20 h-20 border-4 border-slate-800 border-t-indigo-500 rounded-full animate-spin shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
-      <!-- Titik Tengah Berdenyut -->
-      <div class="absolute w-4 h-4 bg-indigo-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.8)]"></div>
+  <!-- ================= SPASH SCREEN LOADING (EQUALIZER MUSIK) ================= -->
+  <div id="global-loader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#030712] transition-opacity duration-700 ease-out">
+    
+    <!-- CSS Animasi Keren -->
+    <style>
+      .music-wave {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        height: 60px;
+        margin-bottom: 28px;
+      }
+      .music-wave span {
+        width: 10px;
+        height: 15px;
+        background: #6366f1; /* Warna Indigo */
+        border-radius: 6px;
+        animation: wave 1s ease-in-out infinite;
+      }
+      .music-wave span:nth-child(1) { animation-delay: 0.0s; }
+      .music-wave span:nth-child(2) { animation-delay: 0.2s; }
+      .music-wave span:nth-child(3) { animation-delay: 0.4s; }
+      .music-wave span:nth-child(4) { animation-delay: 0.2s; }
+      .music-wave span:nth-child(5) { animation-delay: 0.0s; }
+
+      @keyframes wave {
+        0%, 100% { height: 15px; background: #6366f1; box-shadow: 0 0 10px rgba(99,102,241,0.4); }
+        50% { height: 60px; background: #a855f7; box-shadow: 0 0 25px rgba(168,85,247,0.8); }
+      }
+    </style>
+
+    <!-- Bar Grafik Suara -->
+    <div class="music-wave">
+      <span></span><span></span><span></span><span></span><span></span>
     </div>
+    
     <!-- Teks Animasi -->
-    <h2 class="mt-8 text-xl md:text-2xl font-bold tracking-[0.3em] text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500 animate-pulse uppercase">
-      Memuat Memori
+    <h2 class="text-lg md:text-xl font-bold tracking-[0.4em] text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500 animate-pulse uppercase drop-shadow-md">
+      MEMUAT MEMORI
     </h2>
   </div>
   <!-- ================= AKHIR SPLASH SCREEN ================= -->
 
-  <!-- Kontainer Utama tempat Mithril merender UI (Dikosongkan karena sudah ada global-loader di atas) -->
+  <!-- Kontainer Utama tempat Mithril merender UI -->
   <div id="app"></div>
 
   <!-- Vite akan membaca file ini dan memproses CSS serta JS secara otomatis -->
