@@ -45,6 +45,7 @@ const concertSchema = new mongoose.Schema({
   shortTitle: String,
   title: String,
   desc: String,
+  thumbnail: { type: String, default: "" }, // <--- INI TAMBAHANNYA! Pintu untuk logo acara
   gallery: [String],
   videos: [String]
 });
