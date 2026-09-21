@@ -17,7 +17,8 @@ const AdminLayout = {
   concertList: [], 
   isEditing: false, 
   
-  formData: { id: "", shortTitle: "", title: "", desc: "", galleryInput: "", videosInput: "" },
+  // FORM DATA DIPERBARUI DENGAN TAMBAHAN "thumbnailInput"
+  formData: { id: "", shortTitle: "", title: "", desc: "", thumbnailInput: "", galleryInput: "", videosInput: "" },
   statusMsg: "",
 
   oninit: async () => {
@@ -77,6 +78,7 @@ const AdminLayout = {
     AdminLayout.loginData = { username: "", password: "" };
   },
 
+  // FUNGSI EDIT DIPERBARUI UNTUK MEMBACA THUMBNAIL
   editEvent: (concert) => {
     AdminLayout.isEditing = true;
     AdminLayout.formData = {
@@ -84,6 +86,7 @@ const AdminLayout = {
       shortTitle: concert.shortTitle,
       title: concert.title,
       desc: concert.desc,
+      thumbnailInput: concert.thumbnail || "", // Tarik data thumbnail lama (jika ada)
       galleryInput: concert.gallery ? concert.gallery.join("\n") : "",
       videosInput: concert.videos ? concert.videos.join("\n") : ""
     };
@@ -92,7 +95,7 @@ const AdminLayout = {
 
   cancelEdit: () => {
     AdminLayout.isEditing = false;
-    AdminLayout.formData = { id: "", shortTitle: "", title: "", desc: "", galleryInput: "", videosInput: "" };
+    AdminLayout.formData = { id: "", shortTitle: "", title: "", desc: "", thumbnailInput: "", galleryInput: "", videosInput: "" };
   },
 
   deleteEvent: async (id) => {
@@ -109,7 +112,6 @@ const AdminLayout = {
     }
   },
 
-  // FUNGSI SIMPAN EVENT KITA RAPIKAN AGAR TIDAK BENTROK
   submitData: async (e) => {
     e.preventDefault();
     AdminLayout.statusMsg = "Sedang menyimpan data...";
@@ -119,8 +121,8 @@ const AdminLayout = {
       shortTitle: AdminLayout.formData.shortTitle,
       title: AdminLayout.formData.title,
       desc: AdminLayout.formData.desc,
-// KITA UBAH BAGIAN SPLIT-NYA DI DUA BARIS INI:
-      // /[\n,]+/ artinya: "Pecah teksnya setiap kali ketemu tombol Enter ATAU tanda koma"
+      // SIMPAN THUMBNAIL (Satu link saja, hapus spasi/enter yang nggak sengaja ketik)
+      thumbnail: AdminLayout.formData.thumbnailInput.trim(),
       gallery: AdminLayout.formData.galleryInput.split(/[\n,]+/).map(url => url.trim()).filter(url => url),
       videos: AdminLayout.formData.videosInput.split(/[\n,]+/).map(url => url.trim()).filter(url => url)
     };
@@ -142,7 +144,6 @@ const AdminLayout = {
     }
   },
 
-  // FUNGSI UPDATE AKUN (Berdiri sendiri, terpisah dari fungsi lain)
   updateAccount: async (e) => {
     e.preventDefault();
     AdminLayout.accountMsg = "Memproses perubahan...";
@@ -210,6 +211,8 @@ const AdminLayout = {
           
           m("form", { class: "p-6", onsubmit: AdminLayout.submitData },
             m("div", { class: "grid grid-cols-1 md:grid-cols-2 gap-8" },
+              
+              // KIRI: Info Dasar
               m("div", { class: "flex flex-col gap-5" },
                 m("div",
                   m("label", { class: "text-slate-300 text-sm font-medium mb-1 block" }, "ID Event Unik (Kunci Data)"),
@@ -232,14 +235,32 @@ const AdminLayout = {
                   m("textarea", { class: "w-full p-3 bg-slate-900 rounded-lg border border-slate-600 focus:border-indigo-500 outline-none h-28", placeholder: "Ceritakan sedikit tentang event ini...", value: AdminLayout.formData.desc, oninput: (e) => AdminLayout.formData.desc = e.target.value, required: true })
                 )
               ),
+
+              // KANAN: Media (Thumbnail, Foto, Video)
               m("div", { class: "flex flex-col gap-5" },
+                
+                // KOLOM BARU: THUMBNAIL
+                m("div",
+                  m("label", { class: "text-slate-300 text-sm font-medium mb-1 block flex justify-between" }, 
+                    "Logo / Ikon Menu Navbar",
+                    m("span", { class: "text-xs text-amber-500 font-normal" }, "*Opsional (Rekomendasi rasio kotak 1:1)")
+                  ),
+                  m("input", { 
+                    type: "text",
+                    class: "w-full p-3 bg-slate-900 rounded-lg border border-slate-600 focus:border-indigo-500 outline-none", 
+                    placeholder: "https://drive.google.com/... (Link Google Drive)", 
+                    value: AdminLayout.formData.thumbnailInput, 
+                    oninput: (e) => AdminLayout.formData.thumbnailInput = e.target.value 
+                  })
+                ),
+
                 m("div",
                   m("label", { class: "text-slate-300 text-sm font-medium mb-1 block" }, "Arsip Foto (Google Drive Links)"),
-                  m("textarea", { class: "w-full p-3 bg-slate-900 rounded-lg border border-slate-600 focus:border-indigo-500 outline-none h-32 whitespace-nowrap overflow-x-auto", placeholder: "https://drive.google.com/...\n", value: AdminLayout.formData.galleryInput, oninput: (e) => AdminLayout.formData.galleryInput = e.target.value })
+                  m("textarea", { class: "w-full p-3 bg-slate-900 rounded-lg border border-slate-600 focus:border-indigo-500 outline-none h-24 whitespace-nowrap overflow-x-auto", placeholder: "https://drive.google.com/...\n", value: AdminLayout.formData.galleryInput, oninput: (e) => AdminLayout.formData.galleryInput = e.target.value })
                 ),
                 m("div",
-                  m("label", { class: "text-slate-300 text-sm font-medium mb-1 block mt-2" }, "Arsip Video (Google Drive Links)"),
-                  m("textarea", { class: "w-full p-3 bg-slate-900 rounded-lg border border-slate-600 focus:border-indigo-500 outline-none h-32 whitespace-nowrap overflow-x-auto", placeholder: "https://drive.google.com/...\n", value: AdminLayout.formData.videosInput, oninput: (e) => AdminLayout.formData.videosInput = e.target.value })
+                  m("label", { class: "text-slate-300 text-sm font-medium mb-1 block mt-1" }, "Arsip Video (Google Drive Links)"),
+                  m("textarea", { class: "w-full p-3 bg-slate-900 rounded-lg border border-slate-600 focus:border-indigo-500 outline-none h-24 whitespace-nowrap overflow-x-auto", placeholder: "https://drive.google.com/...\n", value: AdminLayout.formData.videosInput, oninput: (e) => AdminLayout.formData.videosInput = e.target.value })
                 )
               )
             ),
@@ -277,6 +298,8 @@ const AdminLayout = {
                       m("td", { class: "p-4 border-b border-slate-700/50 font-mono text-sm text-indigo-300" }, concert.id),
                       m("td", { class: "p-4 border-b border-slate-700/50 text-white" }, concert.shortTitle),
                       m("td", { class: "p-4 border-b border-slate-700/50 text-slate-400 text-sm" }, 
+                        // Tambahkan indikator visual di admin kalau acaranya punya thumbnail
+                        concert.thumbnail ? m("span", {class: "text-amber-500 mr-2", title: "Punya ikon khusus"}, "🖼️") : "",
                         `${concert.gallery ? concert.gallery.length : 0} Foto | ${concert.videos ? concert.videos.length : 0} Video`
                       ),
                       m("td", { class: "p-4 border-b border-slate-700/50 text-right space-x-3" },
@@ -296,7 +319,7 @@ const AdminLayout = {
           )
         ),
 
-        // --- BAGIAN 3: PENGATURAN AKUN ADMIN (POSISINYA YANG BENAR DI SINI) ---
+        // --- BAGIAN 3: PENGATURAN AKUN ADMIN ---
         m("div", { class: "bg-slate-800 rounded-2xl shadow-lg border border-slate-700 overflow-hidden mt-8 mb-8" },
           m("div", { class: "border-b border-slate-700 p-6 bg-slate-800/50" },
             m("h2", { class: "text-lg font-semibold text-white flex items-center gap-2" }, "⚙️ Pengaturan Akun")
