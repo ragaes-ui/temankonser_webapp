@@ -24,23 +24,28 @@ const getInitials = (name) => {
   return (words[0][0] + words[1][0]).toUpperCase();
 };
 
-// --- FUNGSI MENGAMBIL THUMBNAIL (PRIORITAS ADMIN) ---
+// --- FUNGSI MENGAMBIL THUMBNAIL (SUDAH ANTI GOOGLE DRIVE ERROR) ---
 const getThumbnail = (concert) => {
-  // 1. PRIORITAS UTAMA: Jika Admin meng-upload gambar khusus untuk thumbnail
-  if (concert.thumbnail) return concert.thumbnail; 
-  
-  // 2. PRIORITAS KEDUA: Jika Admin meng-upload poster, pakai posternya
-  if (concert.poster) return concert.poster; 
-
-  // 3. PRIORITAS KETIGA: Curi foto pertama dari galeri dokumentasi
-  if (concert.gallery && concert.gallery.length > 0) {
-    const url = concert.gallery[0];
+  // Fungsi kecil untuk mengubah link GDrive biasa jadi direct link gambar
+  const formatLink = (url) => {
+    if (!url) return null;
     const match = url.match(/\/d\/(.*?)\//) || url.match(/id=(.*?)(&|$)/);
     if (match && match[1]) return `https://drive.google.com/uc?id=${match[1]}`;
     return url;
+  };
+
+  // 1. PRIORITAS UTAMA: Admin upload thumbnail (Otomatis terformat jika itu link GDrive)
+  if (concert.thumbnail) return formatLink(concert.thumbnail); 
+  
+  // 2. PRIORITAS KEDUA: Poster
+  if (concert.poster) return formatLink(concert.poster); 
+
+  // 3. PRIORITAS KETIGA: Foto pertama dari galeri
+  if (concert.gallery && concert.gallery.length > 0) {
+    return formatLink(concert.gallery[0]);
   }
   
-  // 4. TERAKHIR (FALLBACK): Admin belum upload apapun, pakai inisial nama event!
+  // 4. TERAKHIR: Inisial
   const initials = getInitials(concert.shortTitle || concert.title);
   return `https://placehold.co/100x100/4f46e5/ffffff?text=${initials}`;
 };
@@ -160,7 +165,7 @@ const Navbar = () => {
           isMenuOpen ? 
             m("div", { class: `mt-4 flex flex-col gap-1.5 pb-2 border-t ${isDark ? 'border-slate-800/50' : 'border-slate-200'} pt-4 max-h-[55vh] overflow-y-auto pr-1` },
               
-              // 1. Menu Beranda Utama (Pakai Logo Teman Konser)
+              // 1. Menu Beranda Utama
               m(m.route.Link, {
                 href: "/home",
                 class: `px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-3.5 ${currentId === "home" ? bgActive : bgHover} ${isDark ? 'text-slate-200' : 'text-slate-700'}`,
@@ -183,7 +188,7 @@ const Navbar = () => {
                   class: `px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-3.5 ${currentId === concert.id ? bgActive : bgHover} ${isDark ? 'text-slate-300' : 'text-slate-700'}`,
                   onclick: () => { isMenuOpen = false; }
                 }, [
-                  // Sistem akan memanggil fungsi pintar getThumbnail()
+                  // Gambar thumbnail (sudah anti error google drive)
                   m("img", {
                     src: getThumbnail(concert),
                     alt: titleText,
