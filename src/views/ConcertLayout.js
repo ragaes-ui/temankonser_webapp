@@ -11,6 +11,32 @@ const formatVideoEmbed = (url) => {
   return url; 
 };
 
+// --- FUNGSI MENCARI INISIAL (UNTUK FALLBACK GAMBAR) ---
+const getInitials = (name) => {
+  if (!name) return "TK";
+  const words = name.trim().split(/\s+/);
+  if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
+};
+
+// --- FUNGSI MENGAMBIL THUMBNAIL (JALUR RAHASIA GOOGLE API) ---
+const getThumbnailUrl = (concert) => {
+  if (!concert) return "";
+  const formatLink = (url) => {
+    if (!url) return null;
+    const match = url.match(/\/d\/(.*?)\//) || url.match(/id=(.*?)(&|$)/);
+    if (match && match[1]) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w500`;
+    return url;
+  };
+
+  if (concert.thumbnail && concert.thumbnail.trim() !== "") return formatLink(concert.thumbnail);
+  if (concert.poster && concert.poster.trim() !== "") return formatLink(concert.poster);
+  if (concert.gallery && concert.gallery.length > 0) return formatLink(concert.gallery[0]);
+  
+  const initials = getInitials(concert.shortTitle || concert.title);
+  return `https://placehold.co/300x300/4f46e5/ffffff?text=${initials}`;
+};
+
 const ConcertLayout = () => {
   let isLoading = false;
   let previousId = null;
@@ -86,6 +112,7 @@ const ConcertLayout = () => {
   return {
     oninit: async () => {
       if (ConcertState.list.length === 0) await ConcertState.loadConcerts();
+      
       previousId = m.route.param("id") || "home";
       ConcertState.setConcert(previousId);
 
@@ -104,6 +131,7 @@ const ConcertLayout = () => {
     onupdate: () => {
       const currentId = m.route.param("id") || "home";
       ConcertState.setConcert(currentId);
+      
       if (currentId !== previousId) {
         previousId = currentId;
         isOpen = false; 
@@ -160,12 +188,9 @@ const ConcertLayout = () => {
         
         m("main", { class: "container mx-auto p-4 md:p-8 flex-grow" },
           isLoading ? 
-            // --- LOADING ANIMASI TK MUTER ---
             m("div", { class: "flex flex-col items-center justify-center mt-40 mb-32" },
               m("div", { class: "relative flex items-center justify-center mb-6" },
-                // Cincin berputar
                 m("div", { class: `w-20 h-20 border-4 ${isDark ? 'border-slate-800' : 'border-slate-300'} border-t-indigo-500 border-b-purple-500 rounded-full animate-spin shadow-[0_0_20px_rgba(99,102,241,0.3)]` }),
-                // Teks TK diam di tengah
                 m("div", { class: "absolute text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-purple-500 tracking-widest drop-shadow-md" }, "TK")
               ),
               m("p", { class: `${textMuted} font-bold tracking-[0.5em] text-xs uppercase animate-pulse` }, Settings.lang === "id" ? "MEMUAT" : "LOADING")
@@ -174,7 +199,8 @@ const ConcertLayout = () => {
             m("div", { class: "animate-[fadeIn_0.5s_ease-out_1]" },
               currentId === "home" ? 
                 
-                m("div", { class: "flex flex-col gap-20 mt-12 pb-16 items-center text-center" },
+                m("div", { class: "flex flex-col gap-24 mt-12 pb-16 items-center text-center" },
+                  // HEADER HOME
                   m("div", { class: "max-w-3xl mx-auto flex flex-col items-center gap-6 relative" },
                     isDark ? m("div", { class: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" }) : null,
                     m("img", { src: "/temankonserlogo.png", alt: "Logo", class: "w-32 h-32 md:w-48 md:h-48 object-contain mx-auto drop-shadow-2xl mb-2 relative z-10" }),
@@ -187,6 +213,7 @@ const ConcertLayout = () => {
                     m("p", { class: `text-md ${isDark ? 'text-slate-500' : 'text-slate-500'}` }, t.hint)
                   ),
 
+                  // STATISTIK
                   m("div", { class: "w-full max-w-4xl mx-auto relative z-10" },
                     m("h2", { class: `text-2xl font-bold ${textHeading} mb-10 tracking-wide` }, t.highlight),
                     m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
@@ -219,11 +246,37 @@ const ConcertLayout = () => {
                 )
 
               : 
-                
+                // HALAMAN EVENT KONSER (SEKARANG ADA THUMBNAIL BESAR)
                 (activeConcert ? 
-                  m("div", { class: `${isDark ? 'bg-slate-900/60 backdrop-blur-md border-slate-700/50' : 'bg-white/80 backdrop-blur-md border-slate-200'} rounded-2xl border p-8 md:p-12 mb-10 text-center max-w-5xl mx-auto mt-4 shadow-2xl transition-colors` },
-                    m("h1", { class: `text-3xl md:text-5xl font-extrabold mb-6 ${textHeading}` }, activeConcert.title),
-                    m("p", { class: `italic mb-10 text-lg ${textMuted} max-w-3xl mx-auto` }, `"${activeConcert.desc}"`),
+                  m("div", { class: `${isDark ? 'bg-slate-900/60 backdrop-blur-md border-slate-700/50' : 'bg-white/80 backdrop-blur-md border-slate-200'} rounded-3xl border p-8 md:p-12 mb-10 text-center max-w-5xl mx-auto mt-4 shadow-2xl transition-colors` },
+                    
+                    // --- BLOK THUMBNAIL & JUDUL ---
+                    m("div", { class: "flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 mb-8" },
+                      // Thumbnail Album/Event
+                      m("div", { class: "relative group" },
+                        m("div", { class: "absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200" }),
+                        m("img", {
+                          src: getThumbnailUrl(activeConcert),
+                          alt: activeConcert.title,
+                          class: `relative w-28 h-28 md:w-36 md:h-36 rounded-2xl object-cover shadow-2xl border-4 ${isDark ? 'border-slate-800' : 'border-white'} transform transition-transform duration-500 hover:scale-105 hover:-rotate-2`,
+                          onerror: (e) => { 
+                            const initials = getInitials(activeConcert.shortTitle || activeConcert.title);
+                            e.target.src = `https://placehold.co/300x300/4f46e5/ffffff?text=${initials}`; 
+                          } 
+                        })
+                      ),
+                      
+                      // Judul Event
+                      m("div", { class: "flex flex-col md:text-left text-center" },
+                        m("h1", { class: `text-3xl md:text-5xl font-extrabold mb-2 ${textHeading} tracking-tight` }, activeConcert.title),
+                        m("span", { class: "inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 w-max mx-auto md:mx-0" }, 
+                          "Ruang Memori"
+                        )
+                      )
+                    ),
+
+                    m("p", { class: `italic mb-12 text-lg ${textMuted} max-w-3xl mx-auto md:mx-0 md:text-left border-l-4 border-indigo-500 pl-4` }, `"${activeConcert.desc}"`),
+                    // --- AKHIR BLOK THUMBNAIL & JUDUL ---
                     
                     !isOpen ? 
                       m("button", {
