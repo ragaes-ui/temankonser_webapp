@@ -24,9 +24,15 @@ const getInitials = (name) => {
   return (words[0][0] + words[1][0]).toUpperCase();
 };
 
-// --- FUNGSI MENGAMBIL THUMBNAIL FOTO EVENT ---
+// --- FUNGSI MENGAMBIL THUMBNAIL (PRIORITAS ADMIN) ---
 const getThumbnail = (concert) => {
+  // 1. PRIORITAS UTAMA: Jika Admin meng-upload gambar khusus untuk thumbnail
+  if (concert.thumbnail) return concert.thumbnail; 
+  
+  // 2. PRIORITAS KEDUA: Jika Admin meng-upload poster, pakai posternya
   if (concert.poster) return concert.poster; 
+
+  // 3. PRIORITAS KETIGA: Curi foto pertama dari galeri dokumentasi
   if (concert.gallery && concert.gallery.length > 0) {
     const url = concert.gallery[0];
     const match = url.match(/\/d\/(.*?)\//) || url.match(/id=(.*?)(&|$)/);
@@ -34,7 +40,7 @@ const getThumbnail = (concert) => {
     return url;
   }
   
-  // Jika tidak ada gambar, buat gambar dinamis pakai inisial nama event!
+  // 4. TERAKHIR (FALLBACK): Admin belum upload apapun, pakai inisial nama event!
   const initials = getInitials(concert.shortTitle || concert.title);
   return `https://placehold.co/100x100/4f46e5/ffffff?text=${initials}`;
 };
@@ -169,7 +175,7 @@ const Navbar = () => {
 
               m("div", { class: `h-px w-full my-1 ${isDark ? 'bg-slate-800' : 'bg-slate-100'}` }),
 
-              // 2. Daftar Event Konser (Pakai Thumbnail Gambar / Inisial Otomatis)
+              // 2. Daftar Event Konser
               ConcertState.list.map(concert => {
                 const titleText = concert.shortTitle || concert.title;
                 return m(m.route.Link, {
@@ -177,7 +183,7 @@ const Navbar = () => {
                   class: `px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-3.5 ${currentId === concert.id ? bgActive : bgHover} ${isDark ? 'text-slate-300' : 'text-slate-700'}`,
                   onclick: () => { isMenuOpen = false; }
                 }, [
-                  // Gambar thumbnail (atau inisial otomatis jika gambar patah/tidak ada)
+                  // Sistem akan memanggil fungsi pintar getThumbnail()
                   m("img", {
                     src: getThumbnail(concert),
                     alt: titleText,
