@@ -24,30 +24,34 @@ const getInitials = (name) => {
   return (words[0][0] + words[1][0]).toUpperCase();
 };
 
-// --- FUNGSI MENGAMBIL THUMBNAIL (SUDAH ANTI GOOGLE DRIVE ERROR) ---
+// --- FUNGSI MENGAMBIL THUMBNAIL (JALUR RAHASIA GOOGLE API) ---
 const getThumbnail = (concert) => {
-  // Fungsi kecil untuk mengubah link GDrive biasa jadi direct link gambar
   const formatLink = (url) => {
     if (!url) return null;
     const match = url.match(/\/d\/(.*?)\//) || url.match(/id=(.*?)(&|$)/);
-    if (match && match[1]) return `https://drive.google.com/uc?id=${match[1]}`;
+    // Menggunakan jalur API Thumbnail Google agar tidak diblokir (anti-cors)
+    if (match && match[1]) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w500`;
     return url;
   };
 
-  // 1. PRIORITAS UTAMA: Admin upload thumbnail (Otomatis terformat jika itu link GDrive)
-  if (concert.thumbnail) return formatLink(concert.thumbnail); 
+  // 1. PRIORITAS UTAMA: Admin upload thumbnail
+  if (concert.thumbnail && concert.thumbnail.trim() !== "") {
+    return formatLink(concert.thumbnail);
+  }
   
   // 2. PRIORITAS KEDUA: Poster
-  if (concert.poster) return formatLink(concert.poster); 
+  if (concert.poster && concert.poster.trim() !== "") {
+    return formatLink(concert.poster);
+  }
 
   // 3. PRIORITAS KETIGA: Foto pertama dari galeri
   if (concert.gallery && concert.gallery.length > 0) {
     return formatLink(concert.gallery[0]);
   }
   
-  // 4. TERAKHIR: Inisial
+  // 4. TERAKHIR: Kalau semua kosong/gagal, kembalikan inisial
   const initials = getInitials(concert.shortTitle || concert.title);
-  return `https://placehold.co/100x100/4f46e5/ffffff?text=${initials}`;
+  return `https://placehold.co/200x200/4f46e5/ffffff?text=${initials}`;
 };
 
 const Navbar = () => {
