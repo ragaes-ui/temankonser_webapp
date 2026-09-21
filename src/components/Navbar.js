@@ -2,13 +2,12 @@ import m from "mithril";
 import ConcertState from "../models/ConcertState.js";
 import Settings from "../models/Settings.js"; 
 
-// --- KOMPONEN BENDERA INDONESIA BULAT ---
+// --- KOMPONEN BENDERA ---
 const FlagID = () => m("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", class: "w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-slate-400/30 flex-shrink-0 shadow-sm" },
   m("rect", { width: "512", height: "256", fill: "#ce1126" }),
   m("rect", { y: "256", width: "512", height: "256", fill: "#f8f9fa" })
 );
 
-// --- KOMPONEN BENDERA INGGRIS (UK) BULAT ---
 const FlagEN = () => m("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", class: "w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-slate-400/30 flex-shrink-0 shadow-sm" },
   m("rect", { width: "512", height: "512", fill: "#012169" }),
   m("path", { fill: "#fff", d: "M512 0v64L314 256l198 192v64h-64L256 314 58 512H0v-64l198-192L0 64V0h64l198 192L448 0h64z" }),
@@ -16,6 +15,20 @@ const FlagEN = () => m("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0
   m("path", { fill: "#fff", d: "M176 0v512h160V0zM0 176v160h512V176z" }),
   m("path", { fill: "#c8102e", d: "M216 0v512h80V0zM0 216v80h512v-80z" })
 );
+
+// --- FUNGSI MENGAMBIL THUMBNAIL FOTO EVENT ---
+const getThumbnail = (concert) => {
+  if (concert.poster) return concert.poster; // Jika ada properti poster khusus
+  if (concert.gallery && concert.gallery.length > 0) {
+    const url = concert.gallery[0];
+    // Konversi link Google Drive agar jadi thumbnail langsung
+    const match = url.match(/\/d\/(.*?)\//) || url.match(/id=(.*?)(&|$)/);
+    if (match && match[1]) return `https://drive.google.com/uc?id=${match[1]}`;
+    return url;
+  }
+  // Gambar default jika event belum ada foto sama sekali
+  return "https://placehold.co/100x100/4f46e5/ffffff?text=TK";
+};
 
 const Navbar = () => {
   let isMenuOpen = false;
@@ -38,7 +51,6 @@ const Navbar = () => {
         : "bg-white/70 backdrop-blur-xl border-gray-200 shadow-sm";
       const textNav = isDark ? "text-white" : "text-slate-900";
       
-      // Hover dan Active diubah agar lebih kalem dan minimalis
       const bgHover = isDark ? "hover:bg-slate-800/60" : "hover:bg-gray-100";
       const bgActive = isDark ? "bg-indigo-500/20 text-indigo-400 font-bold border border-indigo-500/20" : "bg-indigo-50 text-indigo-700 font-bold border border-indigo-200";
 
@@ -47,7 +59,7 @@ const Navbar = () => {
           
           m("div", { class: "flex justify-between items-center" },
             
-            // LOGO
+            // LOGO UTAMA NAVBAR
             m(m.route.Link, { href: "/home", class: "flex items-center gap-3 hover:opacity-80 transition-opacity" },
               m("img", { src: "/temankonserlogo.png", alt: "Logo Teman Konser", class: "w-8 h-8 md:w-10 md:h-10 object-contain rounded-full drop-shadow-md" }),
               m("div", { class: `font-bold text-lg md:text-xl tracking-wide ${textNav}` }, "TemanKonser")
@@ -123,40 +135,46 @@ const Navbar = () => {
                 m("svg", { class: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
                   isMenuOpen 
                   ? m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
-                  : m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M4 6h16M4 12h16m-7 6h7" }) // Ikon burger yang lebih minimalis
+                  : m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M4 6h16M4 12h16m-7 6h7" }) 
                 )
               )
             )
           ),
 
-          // --- DROPDOWN MENU EVENT (DIPERBAIKI JADI MINIMALIS & BISA DI-SCROLL) ---
+          // --- DROPDOWN MENU EVENT (DENGAN THUMBNAIL GAMBAR) ---
           isMenuOpen ? 
-            m("div", { 
-              // PERUBAHAN UTAMA: Tambah max-h-[55vh] dan overflow-y-auto agar bisa di-scroll tapi tidak memakan seluruh layar
-              class: `mt-4 flex flex-col gap-1.5 pb-2 border-t ${isDark ? 'border-slate-800/50' : 'border-slate-200'} pt-4 max-h-[55vh] overflow-y-auto pr-1` 
-            },
+            m("div", { class: `mt-4 flex flex-col gap-1.5 pb-2 border-t ${isDark ? 'border-slate-800/50' : 'border-slate-200'} pt-4 max-h-[55vh] overflow-y-auto pr-1` },
               
-              // Tombol Home
+              // 1. Menu Beranda Utama (Pakai Logo Teman Konser)
               m(m.route.Link, {
                 href: "/home",
-                class: `px-4 py-2.5 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-3 ${currentId === "home" ? bgActive : bgHover} ${isDark ? 'text-slate-200' : 'text-slate-700'}`,
+                class: `px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-3.5 ${currentId === "home" ? bgActive : bgHover} ${isDark ? 'text-slate-200' : 'text-slate-700'}`,
                 onclick: () => { isMenuOpen = false; } 
               }, [
-                m("span", { class: "text-lg opacity-60" }, "🏠"),
+                // Thumbnail Logo
+                m("img", { 
+                  src: "/temankonserlogo.png", 
+                  class: `w-9 h-9 rounded-lg object-contain flex-shrink-0 border ${isDark ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-white'} shadow-sm` 
+                }),
                 m("span", Settings.t("beranda") === "Beranda" ? "Beranda Utama" : "Main Home")
               ]), 
 
-              // Garis pemisah tipis
               m("div", { class: `h-px w-full my-1 ${isDark ? 'bg-slate-800' : 'bg-slate-100'}` }),
 
-              // Daftar Konser (Lebih padat dan rata kiri)
+              // 2. Daftar Event Konser (Pakai Thumbnail dari Galeri Event)
               ConcertState.list.map(concert =>
                 m(m.route.Link, {
                   href: `/${concert.id}`,
-                  class: `px-4 py-2.5 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-3 ${currentId === concert.id ? bgActive : bgHover} ${isDark ? 'text-slate-300' : 'text-slate-700'}`,
+                  class: `px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-3.5 ${currentId === concert.id ? bgActive : bgHover} ${isDark ? 'text-slate-300' : 'text-slate-700'}`,
                   onclick: () => { isMenuOpen = false; }
                 }, [
-                  m("span", { class: "text-base opacity-40" }, "🎫"), // Ikon tiket kecil di samping nama event
+                  // Thumbnail Event (Mengambil foto pertama otomatis)
+                  m("img", {
+                    src: getThumbnail(concert),
+                    alt: concert.shortTitle || concert.title,
+                    class: `w-9 h-9 rounded-lg object-cover flex-shrink-0 shadow-sm border ${isDark ? 'border-slate-700/50' : 'border-slate-200'}`,
+                    onerror: (e) => { e.target.src = "https://placehold.co/100x100/4f46e5/ffffff?text=TK"; } // Jika gambar rusak
+                  }),
                   m("span", { class: "truncate" }, concert.shortTitle || concert.title)
                 ])
               )
