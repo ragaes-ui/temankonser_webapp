@@ -2,12 +2,13 @@ import m from "mithril";
 import ConcertState from "../models/ConcertState.js";
 import Settings from "../models/Settings.js"; 
 
-// --- PERBAIKAN: Ubah menjadi Fungsi () agar bisa di-refresh ---
+// --- KOMPONEN BENDERA INDONESIA BULAT ---
 const FlagID = () => m("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", class: "w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-slate-400/30 flex-shrink-0 shadow-sm" },
   m("rect", { width: "512", height: "256", fill: "#ce1126" }),
   m("rect", { y: "256", width: "512", height: "256", fill: "#f8f9fa" })
 );
 
+// --- KOMPONEN BENDERA INGGRIS (UK) BULAT ---
 const FlagEN = () => m("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", class: "w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-slate-400/30 flex-shrink-0 shadow-sm" },
   m("rect", { width: "512", height: "512", fill: "#012169" }),
   m("path", { fill: "#fff", d: "M512 0v64L314 256l198 192v64h-64L256 314 58 512H0v-64l198-192L0 64V0h64l198 192L448 0h64z" }),
@@ -29,15 +30,17 @@ const Navbar = () => {
 
   return {
     view: () => {
-      const currentId = m.route.param("id");
+      const currentId = m.route.param("id") || "home";
       const isDark = Settings.theme === "dark";
       
       const bgNav = isDark 
         ? "bg-slate-950/70 backdrop-blur-xl border-slate-800/50" 
         : "bg-white/70 backdrop-blur-xl border-gray-200 shadow-sm";
       const textNav = isDark ? "text-white" : "text-slate-900";
-      const bgHover = isDark ? "hover:bg-slate-800/50" : "hover:bg-gray-100/50";
-      const bgActive = isDark ? "bg-indigo-500/20 text-indigo-400 font-bold border border-indigo-500/30" : "bg-indigo-50 text-indigo-700 font-bold";
+      
+      // Hover dan Active diubah agar lebih kalem dan minimalis
+      const bgHover = isDark ? "hover:bg-slate-800/60" : "hover:bg-gray-100";
+      const bgActive = isDark ? "bg-indigo-500/20 text-indigo-400 font-bold border border-indigo-500/20" : "bg-indigo-50 text-indigo-700 font-bold border border-indigo-200";
 
       return m("nav", { class: `${bgNav} p-4 border-b sticky top-0 z-50 transition-all duration-500` },
         m("div", { class: "container mx-auto" },
@@ -72,15 +75,12 @@ const Navbar = () => {
 
               // 2. KELOMPOK BAHASA
               m("div", { class: "relative" }, [
-                
-                // Tombol Pemicu Bahasa
                 m("button", {
                   class: `flex items-center gap-2 pl-2 pr-3 py-1.5 md:py-2 rounded-full border transition-all duration-300 ${
                     isDark ? 'border-zinc-700 bg-zinc-800/40 hover:bg-zinc-700/80 text-white' : 'border-gray-300 bg-white hover:bg-gray-100 text-slate-800'
                   }`,
                   onclick: (e) => { e.preventDefault(); isLangMenuOpen = !isLangMenuOpen; }
                 }, [
-                  // MANTRA SAKTI: Panggil fungsinya pakai ()
                   Settings.lang === "id" ? FlagID() : FlagEN(), 
                   m("span", { class: "font-bold text-sm" }, Settings.lang === "id" ? "ID" : "EN"),
                   m("svg", { class: `w-4 h-4 text-gray-400 transition-transform duration-300 ${isLangMenuOpen ? 'rotate-180' : ''}`, fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
@@ -88,16 +88,11 @@ const Navbar = () => {
                   )
                 ]),
 
-                // JARING TAK KASAT MATA
                 isLangMenuOpen ? m("div", {
                   class: "fixed inset-0 z-40 cursor-default", 
-                  onclick: (e) => { 
-                    e.stopPropagation(); 
-                    isLangMenuOpen = false; 
-                  }
+                  onclick: (e) => { e.stopPropagation(); isLangMenuOpen = false; }
                 }) : null,
 
-                // MENU DROPDOWN BAHASA
                 isLangMenuOpen ? m("div", {
                   class: `absolute top-full mt-3 right-0 w-44 rounded-2xl border shadow-xl overflow-hidden z-50 animate-[fadeIn_0.2s_ease-out_1] ${
                     isDark ? 'bg-[#1E293B] border-slate-700 text-white shadow-black/50' : 'bg-white border-gray-200 text-slate-800 shadow-indigo-900/10'
@@ -108,23 +103,17 @@ const Navbar = () => {
                       isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'
                     } ${Settings.lang === "id" ? (isDark ? 'bg-slate-800' : 'bg-indigo-50') : ''}`,
                     onclick: () => setLanguage("id")
-                  }, [
-                    FlagID(), // Panggil fungsi pakai ()
-                    m("span", { class: "font-medium text-[15px]" }, "Indonesia")
-                  ]),
+                  }, [FlagID(), m("span", { class: "font-medium text-[15px]" }, "Indonesia")]),
                   m("button", {
                     class: `w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
                       isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'
                     } ${Settings.lang === "en" ? (isDark ? 'bg-slate-800' : 'bg-indigo-50') : ''}`,
                     onclick: () => setLanguage("en")
-                  }, [
-                    FlagEN(), // Panggil fungsi pakai ()
-                    m("span", { class: "font-medium text-[15px]" }, "English")
-                  ])
+                  }, [FlagEN(), m("span", { class: "font-medium text-[15px]" }, "English")])
                 ]) : null
               ]),
 
-              // 3. TOMBOL MENU TITIK TIGA
+              // 3. TOMBOL MENU EVENT
               m("button", {
                 class: `flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 ${
                   isDark ? 'border-zinc-700 bg-zinc-800/40 hover:bg-zinc-700/80 text-white' : 'border-gray-300 bg-white hover:bg-gray-100 text-slate-800'
@@ -134,27 +123,42 @@ const Navbar = () => {
                 m("svg", { class: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
                   isMenuOpen 
                   ? m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
-                  : m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" })
+                  : m("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M4 6h16M4 12h16m-7 6h7" }) // Ikon burger yang lebih minimalis
                 )
               )
             )
           ),
 
-          // --- DROPDOWN MENU EVENT ---
+          // --- DROPDOWN MENU EVENT (DIPERBAIKI JADI MINIMALIS & BISA DI-SCROLL) ---
           isMenuOpen ? 
-            m("div", { class: `mt-4 flex flex-col gap-2 pb-2 border-t ${isDark ? 'border-slate-800/50' : 'border-slate-200'} pt-4` },
+            m("div", { 
+              // PERUBAHAN UTAMA: Tambah max-h-[55vh] dan overflow-y-auto agar bisa di-scroll tapi tidak memakan seluruh layar
+              class: `mt-4 flex flex-col gap-1.5 pb-2 border-t ${isDark ? 'border-slate-800/50' : 'border-slate-200'} pt-4 max-h-[55vh] overflow-y-auto pr-1` 
+            },
+              
+              // Tombol Home
               m(m.route.Link, {
                 href: "/home",
-                class: `px-4 py-3 rounded-2xl text-base font-medium transition text-center ${currentId === "home" ? bgActive : bgHover} ${isDark ? 'text-slate-300' : 'text-slate-800'}`,
+                class: `px-4 py-2.5 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-3 ${currentId === "home" ? bgActive : bgHover} ${isDark ? 'text-slate-200' : 'text-slate-700'}`,
                 onclick: () => { isMenuOpen = false; } 
-              }, Settings.t("beranda")), 
+              }, [
+                m("span", { class: "text-lg opacity-60" }, "🏠"),
+                m("span", Settings.t("beranda") === "Beranda" ? "Beranda Utama" : "Main Home")
+              ]), 
 
+              // Garis pemisah tipis
+              m("div", { class: `h-px w-full my-1 ${isDark ? 'bg-slate-800' : 'bg-slate-100'}` }),
+
+              // Daftar Konser (Lebih padat dan rata kiri)
               ConcertState.list.map(concert =>
                 m(m.route.Link, {
                   href: `/${concert.id}`,
-                  class: `px-4 py-3 rounded-2xl text-base font-medium transition text-center ${currentId === concert.id ? bgActive : bgHover} ${isDark ? 'text-slate-300' : 'text-slate-800'}`,
+                  class: `px-4 py-2.5 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-3 ${currentId === concert.id ? bgActive : bgHover} ${isDark ? 'text-slate-300' : 'text-slate-700'}`,
                   onclick: () => { isMenuOpen = false; }
-                }, concert.shortTitle || concert.title)
+                }, [
+                  m("span", { class: "text-base opacity-40" }, "🎫"), // Ikon tiket kecil di samping nama event
+                  m("span", { class: "truncate" }, concert.shortTitle || concert.title)
+                ])
               )
             )
           : null
