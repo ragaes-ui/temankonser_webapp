@@ -16,18 +16,27 @@ const FlagEN = () => m("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0
   m("path", { fill: "#c8102e", d: "M216 0v512h80V0zM0 216v80h512v-80z" })
 );
 
+// --- FUNGSI MENCARI INISIAL NAMA EVENT ---
+const getInitials = (name) => {
+  if (!name) return "TK";
+  const words = name.trim().split(/\s+/);
+  if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
+};
+
 // --- FUNGSI MENGAMBIL THUMBNAIL FOTO EVENT ---
 const getThumbnail = (concert) => {
-  if (concert.poster) return concert.poster; // Jika ada properti poster khusus
+  if (concert.poster) return concert.poster; 
   if (concert.gallery && concert.gallery.length > 0) {
     const url = concert.gallery[0];
-    // Konversi link Google Drive agar jadi thumbnail langsung
     const match = url.match(/\/d\/(.*?)\//) || url.match(/id=(.*?)(&|$)/);
     if (match && match[1]) return `https://drive.google.com/uc?id=${match[1]}`;
     return url;
   }
-  // Gambar default jika event belum ada foto sama sekali
-  return "https://placehold.co/100x100/4f46e5/ffffff?text=TK";
+  
+  // Jika tidak ada gambar, buat gambar dinamis pakai inisial nama event!
+  const initials = getInitials(concert.shortTitle || concert.title);
+  return `https://placehold.co/100x100/4f46e5/ffffff?text=${initials}`;
 };
 
 const Navbar = () => {
@@ -141,7 +150,7 @@ const Navbar = () => {
             )
           ),
 
-          // --- DROPDOWN MENU EVENT (DENGAN THUMBNAIL GAMBAR) ---
+          // --- DROPDOWN MENU EVENT ---
           isMenuOpen ? 
             m("div", { class: `mt-4 flex flex-col gap-1.5 pb-2 border-t ${isDark ? 'border-slate-800/50' : 'border-slate-200'} pt-4 max-h-[55vh] overflow-y-auto pr-1` },
               
@@ -151,7 +160,6 @@ const Navbar = () => {
                 class: `px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-3.5 ${currentId === "home" ? bgActive : bgHover} ${isDark ? 'text-slate-200' : 'text-slate-700'}`,
                 onclick: () => { isMenuOpen = false; } 
               }, [
-                // Thumbnail Logo
                 m("img", { 
                   src: "/temankonserlogo.png", 
                   class: `w-9 h-9 rounded-lg object-contain flex-shrink-0 border ${isDark ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-white'} shadow-sm` 
@@ -161,23 +169,27 @@ const Navbar = () => {
 
               m("div", { class: `h-px w-full my-1 ${isDark ? 'bg-slate-800' : 'bg-slate-100'}` }),
 
-              // 2. Daftar Event Konser (Pakai Thumbnail dari Galeri Event)
-              ConcertState.list.map(concert =>
-                m(m.route.Link, {
+              // 2. Daftar Event Konser (Pakai Thumbnail Gambar / Inisial Otomatis)
+              ConcertState.list.map(concert => {
+                const titleText = concert.shortTitle || concert.title;
+                return m(m.route.Link, {
                   href: `/${concert.id}`,
                   class: `px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-3.5 ${currentId === concert.id ? bgActive : bgHover} ${isDark ? 'text-slate-300' : 'text-slate-700'}`,
                   onclick: () => { isMenuOpen = false; }
                 }, [
-                  // Thumbnail Event (Mengambil foto pertama otomatis)
+                  // Gambar thumbnail (atau inisial otomatis jika gambar patah/tidak ada)
                   m("img", {
                     src: getThumbnail(concert),
-                    alt: concert.shortTitle || concert.title,
+                    alt: titleText,
                     class: `w-9 h-9 rounded-lg object-cover flex-shrink-0 shadow-sm border ${isDark ? 'border-slate-700/50' : 'border-slate-200'}`,
-                    onerror: (e) => { e.target.src = "https://placehold.co/100x100/4f46e5/ffffff?text=TK"; } // Jika gambar rusak
+                    onerror: (e) => { 
+                      const initials = getInitials(titleText);
+                      e.target.src = `https://placehold.co/100x100/4f46e5/ffffff?text=${initials}`; 
+                    } 
                   }),
-                  m("span", { class: "truncate" }, concert.shortTitle || concert.title)
-                ])
-              )
+                  m("span", { class: "truncate" }, titleText)
+                ]);
+              })
             )
           : null
         )
