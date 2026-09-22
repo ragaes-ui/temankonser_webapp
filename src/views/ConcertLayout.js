@@ -47,7 +47,6 @@ const ConcertLayout = () => {
   let chatHistory = [{ role: "ai", text: "Halo bro! Gue asisten AI Teman Konser. Ada yang pengen ditanyain seputar web ini?" }];
   let autoScrollChat = true; 
 
-  // --- STATE UNTUK POPUP VIDEO ---
   let selectedVideo = null; 
 
   const sendChatMessage = async (e) => {
@@ -335,28 +334,27 @@ const ConcertLayout = () => {
             )
         ),
 
-        // --- POPUP VIDEO (TRANSPARAN & RESPONSIF) ---
+        // --- POPUP VIDEO (HP FULL SCREEN, LAPTOP TETAP NORMAL) ---
         selectedVideo ? 
           m("div", { 
-            // Layar belakang saya buat jadi mode kaca buram (backdrop-blur) yang lebih cerah
-            class: "fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 md:p-8 animate-[fadeIn_0.2s_ease-out_1]",
+            // Di HP padding 0 (p-0) biar penuh ujung ke ujung, di Laptop padding 8 (md:p-8)
+            class: "fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-0 md:p-8 animate-[fadeIn_0.2s_ease-out_1]",
             onclick: () => { selectedVideo = null; } 
           },
             m("div", { 
-              // Bungkus popup saya buat transparan dan ukurannya fleksibel (h-[80vh]) biar pas buat video berdiri
-              class: "relative w-full max-w-4xl h-[80vh] md:h-[85vh] bg-transparent rounded-2xl overflow-hidden flex items-center justify-center",
+              // Di HP: w-full h-[100dvh] (Penuh 100% Layar). Di Laptop: max-w-4xl h-[85vh] (Biarin kayak sebelumnya)
+              class: "relative w-full h-[100dvh] md:max-w-4xl md:h-[85vh] bg-black md:bg-transparent md:rounded-2xl overflow-hidden flex items-center justify-center",
               onclick: (e) => { e.stopPropagation(); } 
             },
-              // Tombol close saya bikin lebih mencolok di pojok kanan atas
               m("button", { 
-                class: "absolute top-0 right-0 z-20 w-10 h-10 bg-rose-600/90 hover:bg-rose-500 text-white rounded-full flex items-center justify-center transition-all shadow-xl backdrop-blur-md border border-white/20",
+                class: "absolute top-4 right-4 z-20 w-10 h-10 bg-rose-600/90 hover:bg-rose-500 text-white rounded-full flex items-center justify-center transition-all shadow-xl backdrop-blur-md border border-white/20",
                 onclick: () => { selectedVideo = null; }
               }, "✕"),
               
               selectedVideo.includes("drive.google.com") ? 
-                m("iframe", { src: formatVideoEmbed(selectedVideo), class: "w-full h-full border-0 rounded-xl shadow-2xl", allowfullscreen: true })
+                m("iframe", { src: formatVideoEmbed(selectedVideo), class: "w-full h-full border-0 md:rounded-xl md:shadow-2xl", allowfullscreen: true })
               : 
-                m("video", { src: selectedVideo, class: "w-full h-full object-contain rounded-xl drop-shadow-2xl", controls: true, autoplay: true })
+                m("video", { src: selectedVideo, class: "w-full h-full object-contain md:rounded-xl md:drop-shadow-2xl", controls: true, autoplay: true })
             )
           ) 
         : null,
