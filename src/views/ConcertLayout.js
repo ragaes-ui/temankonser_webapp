@@ -294,21 +294,24 @@ const ConcertLayout = () => {
                               m("div", { class: `grid grid-cols-1 sm:grid-cols-2 gap-5 ${isDark ? 'bg-slate-950/50 border-slate-800/50' : 'bg-slate-50 border-slate-200'} p-5 rounded-3xl border shadow-inner` },
                                 (activeConcert.videos || []).map((vidUrl) => 
                                   
-                                  // --- BAGIAN KOTAK VIDEO DIPERBARUI MENJADI KLIKABEL ---
+                                  // --- KOTAK VIDEO DIPERBAIKI UNTUK LAYAR SENTUH (HP) ---
                                   m("div", { class: `w-full ${isDark ? 'bg-black' : 'bg-slate-900'} p-2 rounded-2xl shadow-xl border border-slate-800 animate-[fadeIn_0.5s_ease-out_1]` },
-                                    m("div", { 
-                                      class: "relative w-full h-[250px] md:h-[350px] rounded-xl overflow-hidden group cursor-pointer",
-                                      onclick: () => { selectedVideo = vidUrl; }
-                                    },
-                                      // Iframe disembunyikan kliknya (pointer-events-none) agar overlay tombol play bisa diklik
+                                    m("div", { class: "relative w-full h-[250px] md:h-[350px] rounded-xl overflow-hidden group" },
+                                      
                                       vidUrl.includes("drive.google.com") ? 
                                         m("iframe", { src: formatVideoEmbed(vidUrl), class: "w-full h-full border-0 pointer-events-none", allowfullscreen: true, loading: "lazy", tabindex: "-1" })
                                       : 
                                         m("video", { src: vidUrl, class: "w-full h-full object-cover bg-black pointer-events-none" }),
                                       
-                                      // Overlay Tombol Play
-                                      m("div", { class: "absolute inset-0 bg-black/20 group-hover:bg-black/50 transition-all duration-300 z-10 flex items-center justify-center" },
-                                        m("div", { class: "w-16 h-16 bg-white/20 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300" },
+                                      // TOMBOL PLAY DI-OVERLAY (Menangkap sentuhan layar HP secara langsung)
+                                      m("div", { 
+                                        class: "absolute inset-0 bg-black/20 hover:bg-black/50 transition-all duration-300 z-10 flex items-center justify-center cursor-pointer",
+                                        onclick: (e) => { 
+                                          e.preventDefault(); // Cegah error bentrok klik di browser HP
+                                          selectedVideo = vidUrl; 
+                                        }
+                                      },
+                                        m("div", { class: "w-16 h-16 bg-white/20 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300" },
                                           m("svg", { class: "w-8 h-8 text-white ml-1", fill: "currentColor", viewBox: "0 0 24 24" },
                                             m("path", { d: "M8 5v14l11-7z" })
                                           )
@@ -334,24 +337,26 @@ const ConcertLayout = () => {
             )
         ),
 
-        // --- KOMPONEN POPUP VIDEO FULLSCREEN ---
+        // --- POPUP VIDEO (DIBUAT RESPONSIF "ASPECT-VIDEO" AGAR CANTIK DI HP) ---
         selectedVideo ? 
           m("div", { 
-            class: "fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 animate-[fadeIn_0.2s_ease-out_1]",
+            class: "fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 md:p-10 animate-[fadeIn_0.2s_ease-out_1]",
             onclick: () => { selectedVideo = null; } 
           },
             m("div", { 
-              class: "relative w-full max-w-5xl h-[75vh] md:h-[90vh] bg-black rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-slate-800",
+              // Menggunakan "aspect-video" (16:9) agar ukuran popup selalu pas di layar HP maupun Laptop
+              class: "relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-slate-800 flex items-center justify-center",
               onclick: (e) => { e.stopPropagation(); } 
             },
               m("button", { 
-                class: "absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition-all border border-white/10 backdrop-blur-md",
+                class: "absolute top-2 right-2 md:top-4 md:right-4 z-20 w-10 h-10 bg-black/50 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition-all border border-white/20 backdrop-blur-md shadow-lg",
                 onclick: () => { selectedVideo = null; }
               }, "✕"),
+              
               selectedVideo.includes("drive.google.com") ? 
-                m("iframe", { src: formatVideoEmbed(selectedVideo), class: "w-full h-full border-0", allowfullscreen: true })
+                m("iframe", { src: formatVideoEmbed(selectedVideo), class: "absolute inset-0 w-full h-full border-0", allowfullscreen: true })
               : 
-                m("video", { src: selectedVideo, class: "w-full h-full object-contain bg-black", controls: true, autoplay: true })
+                m("video", { src: selectedVideo, class: "absolute inset-0 w-full h-full object-contain bg-black", controls: true, autoplay: true })
             )
           ) 
         : null,
