@@ -294,7 +294,6 @@ const ConcertLayout = () => {
                               m("div", { class: `grid grid-cols-1 sm:grid-cols-2 gap-5 ${isDark ? 'bg-slate-950/50 border-slate-800/50' : 'bg-slate-50 border-slate-200'} p-5 rounded-3xl border shadow-inner` },
                                 (activeConcert.videos || []).map((vidUrl) => 
                                   
-                                  // --- KOTAK VIDEO DIPERBAIKI UNTUK LAYAR SENTUH (HP) ---
                                   m("div", { class: `w-full ${isDark ? 'bg-black' : 'bg-slate-900'} p-2 rounded-2xl shadow-xl border border-slate-800 animate-[fadeIn_0.5s_ease-out_1]` },
                                     m("div", { class: "relative w-full h-[250px] md:h-[350px] rounded-xl overflow-hidden group" },
                                       
@@ -303,11 +302,10 @@ const ConcertLayout = () => {
                                       : 
                                         m("video", { src: vidUrl, class: "w-full h-full object-cover bg-black pointer-events-none" }),
                                       
-                                      // TOMBOL PLAY DI-OVERLAY (Menangkap sentuhan layar HP secara langsung)
                                       m("div", { 
-                                        class: "absolute inset-0 bg-black/20 hover:bg-black/50 transition-all duration-300 z-10 flex items-center justify-center cursor-pointer",
+                                        class: "absolute inset-0 bg-transparent hover:bg-black/30 transition-all duration-300 z-10 flex items-center justify-center cursor-pointer",
                                         onclick: (e) => { 
-                                          e.preventDefault(); // Cegah error bentrok klik di browser HP
+                                          e.preventDefault();
                                           selectedVideo = vidUrl; 
                                         }
                                       },
@@ -337,26 +335,28 @@ const ConcertLayout = () => {
             )
         ),
 
-        // --- POPUP VIDEO (DIBUAT RESPONSIF "ASPECT-VIDEO" AGAR CANTIK DI HP) ---
+        // --- POPUP VIDEO (TRANSPARAN & RESPONSIF) ---
         selectedVideo ? 
           m("div", { 
-            class: "fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 md:p-10 animate-[fadeIn_0.2s_ease-out_1]",
+            // Layar belakang saya buat jadi mode kaca buram (backdrop-blur) yang lebih cerah
+            class: "fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 md:p-8 animate-[fadeIn_0.2s_ease-out_1]",
             onclick: () => { selectedVideo = null; } 
           },
             m("div", { 
-              // Menggunakan "aspect-video" (16:9) agar ukuran popup selalu pas di layar HP maupun Laptop
-              class: "relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-slate-800 flex items-center justify-center",
+              // Bungkus popup saya buat transparan dan ukurannya fleksibel (h-[80vh]) biar pas buat video berdiri
+              class: "relative w-full max-w-4xl h-[80vh] md:h-[85vh] bg-transparent rounded-2xl overflow-hidden flex items-center justify-center",
               onclick: (e) => { e.stopPropagation(); } 
             },
+              // Tombol close saya bikin lebih mencolok di pojok kanan atas
               m("button", { 
-                class: "absolute top-2 right-2 md:top-4 md:right-4 z-20 w-10 h-10 bg-black/50 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition-all border border-white/20 backdrop-blur-md shadow-lg",
+                class: "absolute top-0 right-0 z-20 w-10 h-10 bg-rose-600/90 hover:bg-rose-500 text-white rounded-full flex items-center justify-center transition-all shadow-xl backdrop-blur-md border border-white/20",
                 onclick: () => { selectedVideo = null; }
               }, "✕"),
               
               selectedVideo.includes("drive.google.com") ? 
-                m("iframe", { src: formatVideoEmbed(selectedVideo), class: "absolute inset-0 w-full h-full border-0", allowfullscreen: true })
+                m("iframe", { src: formatVideoEmbed(selectedVideo), class: "w-full h-full border-0 rounded-xl shadow-2xl", allowfullscreen: true })
               : 
-                m("video", { src: selectedVideo, class: "absolute inset-0 w-full h-full object-contain bg-black", controls: true, autoplay: true })
+                m("video", { src: selectedVideo, class: "w-full h-full object-contain rounded-xl drop-shadow-2xl", controls: true, autoplay: true })
             )
           ) 
         : null,
