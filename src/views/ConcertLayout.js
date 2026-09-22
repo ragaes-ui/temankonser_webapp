@@ -45,9 +45,10 @@ const ConcertLayout = () => {
   let chatMessage = "";
   let isAiTyping = false;
   let chatHistory = [{ role: "ai", text: "Halo bro! Gue asisten AI Teman Konser. Ada yang pengen ditanyain seputar web ini?" }];
-  
-  // PENJAGA SCROLL (Hanya aktif kalau ada chat baru)
   let autoScrollChat = true; 
+
+  // --- STATE UNTUK POPUP VIDEO ---
+  let selectedVideo = null; 
 
   const sendChatMessage = async (e) => {
     e.preventDefault();
@@ -57,7 +58,7 @@ const ConcertLayout = () => {
     chatHistory.push({ role: "user", text: userText });
     chatMessage = "";
     isAiTyping = true;
-    autoScrollChat = true; // Paksa scroll turun saat kita ngirim pesan
+    autoScrollChat = true; 
     m.redraw(); 
 
     const alamatServer = window.location.hostname === "localhost" ? "http://localhost:3000/api" : "/api";
@@ -69,7 +70,7 @@ const ConcertLayout = () => {
       chatHistory.push({ role: "ai", text: Settings.lang === "id" ? "Duh, koneksi ke otak AI gue lagi gangguan nih." : "Oops, my AI brain connection is down." });
     } finally {
       isAiTyping = false;
-      autoScrollChat = true; // Paksa scroll turun saat AI selesai membalas
+      autoScrollChat = true; 
       m.redraw();
     }
   };
@@ -184,7 +185,7 @@ const ConcertLayout = () => {
         connect: Settings.lang === "id" ? "Terkoneksi dengan Kami:" : "Connect with Us:"
       };
 
-      return m("div", { class: `min-h-screen flex flex-col ${bgRoot} font-sans transition-colors duration-500`, key: "layout" },
+      return m("div", { class: `min-h-screen flex flex-col ${bgRoot} font-sans transition-colors duration-500 relative`, key: "layout" },
         m(Navbar),
         
         m("main", { class: "container mx-auto p-4 md:p-8 flex-grow" },
@@ -292,12 +293,30 @@ const ConcertLayout = () => {
                               ),
                               m("div", { class: `grid grid-cols-1 sm:grid-cols-2 gap-5 ${isDark ? 'bg-slate-950/50 border-slate-800/50' : 'bg-slate-50 border-slate-200'} p-5 rounded-3xl border shadow-inner` },
                                 (activeConcert.videos || []).map((vidUrl) => 
-                                  m("div", { class: `w-full ${isDark ? 'bg-black' : 'bg-slate-900'} p-2.5 rounded-2xl shadow-xl border border-slate-800 animate-[fadeIn_0.5s_ease-out_1]` },
-                                    vidUrl.includes("drive.google.com") ? 
-                                      m("iframe", { src: formatVideoEmbed(vidUrl), class: "w-full h-[250px] md:h-[350px] rounded-xl border-0", allowfullscreen: true, loading: "lazy" })
-                                    : 
-                                      m("video", { src: vidUrl, class: "w-full h-[250px] md:h-[350px] object-contain rounded-xl bg-black", controls: true })
+                                  
+                                  // --- BAGIAN KOTAK VIDEO DIPERBARUI MENJADI KLIKABEL ---
+                                  m("div", { class: `w-full ${isDark ? 'bg-black' : 'bg-slate-900'} p-2 rounded-2xl shadow-xl border border-slate-800 animate-[fadeIn_0.5s_ease-out_1]` },
+                                    m("div", { 
+                                      class: "relative w-full h-[250px] md:h-[350px] rounded-xl overflow-hidden group cursor-pointer",
+                                      onclick: () => { selectedVideo = vidUrl; }
+                                    },
+                                      // Iframe disembunyikan kliknya (pointer-events-none) agar overlay tombol play bisa diklik
+                                      vidUrl.includes("drive.google.com") ? 
+                                        m("iframe", { src: formatVideoEmbed(vidUrl), class: "w-full h-full border-0 pointer-events-none", allowfullscreen: true, loading: "lazy", tabindex: "-1" })
+                                      : 
+                                        m("video", { src: vidUrl, class: "w-full h-full object-cover bg-black pointer-events-none" }),
+                                      
+                                      // Overlay Tombol Play
+                                      m("div", { class: "absolute inset-0 bg-black/20 group-hover:bg-black/50 transition-all duration-300 z-10 flex items-center justify-center" },
+                                        m("div", { class: "w-16 h-16 bg-white/20 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300" },
+                                          m("svg", { class: "w-8 h-8 text-white ml-1", fill: "currentColor", viewBox: "0 0 24 24" },
+                                            m("path", { d: "M8 5v14l11-7z" })
+                                          )
+                                        )
+                                      )
+                                    )
                                   )
+
                                 )
                               )
                             ) 
@@ -315,15 +334,35 @@ const ConcertLayout = () => {
             )
         ),
 
-        // --- KOMPONEN AI CHATBOT (DENGAN SCROLL PINTAR) ---
+        // --- KOMPONEN POPUP VIDEO FULLSCREEN ---
+        selectedVideo ? 
+          m("div", { 
+            class: "fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 animate-[fadeIn_0.2s_ease-out_1]",
+            onclick: () => { selectedVideo = null; } 
+          },
+            m("div", { 
+              class: "relative w-full max-w-5xl h-[75vh] md:h-[90vh] bg-black rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-slate-800",
+              onclick: (e) => { e.stopPropagation(); } 
+            },
+              m("button", { 
+                class: "absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition-all border border-white/10 backdrop-blur-md",
+                onclick: () => { selectedVideo = null; }
+              }, "✕"),
+              selectedVideo.includes("drive.google.com") ? 
+                m("iframe", { src: formatVideoEmbed(selectedVideo), class: "w-full h-full border-0", allowfullscreen: true })
+              : 
+                m("video", { src: selectedVideo, class: "w-full h-full object-contain bg-black", controls: true, autoplay: true })
+            )
+          ) 
+        : null,
+
+        // --- KOMPONEN AI CHATBOT ---
         m("div", { class: "fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans" },
           isChatOpen ? m("div", { class: `${isDark ? 'bg-slate-900/95 backdrop-blur-xl border-slate-700/50' : 'bg-white/95 backdrop-blur-xl border-slate-200'} border rounded-3xl w-[340px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-4 overflow-hidden flex flex-col animate-[fadeIn_0.2s_ease-out_1]` },
             m("div", { class: "bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex justify-between items-center text-white" },
               m("span", { class: "font-bold flex items-center gap-2 text-md" }, "🤖 Teman Konser AI"),
               m("button", { class: "hover:text-indigo-200 font-bold text-lg", onclick: () => isChatOpen = false }, "✕")
             ),
-            
-            // BAGIAN INI YANG KITA PERBAIKI
             m("div", { 
               class: `p-5 h-80 overflow-y-auto flex flex-col gap-4 ${isDark ? 'bg-transparent' : 'bg-slate-50/50'} text-sm`, 
               id: "chat-box", 
@@ -331,7 +370,7 @@ const ConcertLayout = () => {
               onupdate: (vnode) => { 
                 if (autoScrollChat) {
                   vnode.dom.scrollTop = vnode.dom.scrollHeight; 
-                  autoScrollChat = false; // Matikan tuasnya setelah berhasil turun
+                  autoScrollChat = false; 
                 }
               }
             },
@@ -342,7 +381,6 @@ const ConcertLayout = () => {
               ),
               isAiTyping ? m("div", { class: `${textMuted} italic text-xs ml-2 flex gap-1` }, m("span", {class: "animate-bounce"}, "•"), m("span", {class: "animate-bounce delay-75"}, "•"), m("span", {class: "animate-bounce delay-150"}, "•")) : null
             ),
-            
             m("form", { class: `flex p-4 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'} border-t`, onsubmit: sendChatMessage },
               m("input", { class: `flex-grow ${isDark ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-100 border-slate-200 text-slate-900'} border rounded-xl p-3 outline-none focus:border-indigo-500 text-sm transition-colors`, placeholder: Settings.lang === "id" ? "Tanya apa aja..." : "Ask me anything...", value: chatMessage, oninput: e => chatMessage = e.target.value }),
               m("button", { type: "submit", class: "ml-3 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 rounded-xl font-bold text-sm transition-all" }, "➤")
