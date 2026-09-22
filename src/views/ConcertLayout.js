@@ -11,7 +11,6 @@ const formatVideoEmbed = (url) => {
   return url; 
 };
 
-// --- FUNGSI MENCARI INISIAL (UNTUK FALLBACK GAMBAR) ---
 const getInitials = (name) => {
   if (!name) return "TK";
   const words = name.trim().split(/\s+/);
@@ -19,7 +18,6 @@ const getInitials = (name) => {
   return (words[0][0] + words[1][0]).toUpperCase();
 };
 
-// --- FUNGSI MENGAMBIL THUMBNAIL (JALUR RAHASIA GOOGLE API) ---
 const getThumbnailUrl = (concert) => {
   if (!concert) return "";
   const formatLink = (url) => {
@@ -47,6 +45,9 @@ const ConcertLayout = () => {
   let chatMessage = "";
   let isAiTyping = false;
   let chatHistory = [{ role: "ai", text: "Halo bro! Gue asisten AI Teman Konser. Ada yang pengen ditanyain seputar web ini?" }];
+  
+  // PENJAGA SCROLL (Hanya aktif kalau ada chat baru)
+  let autoScrollChat = true; 
 
   const sendChatMessage = async (e) => {
     e.preventDefault();
@@ -56,6 +57,7 @@ const ConcertLayout = () => {
     chatHistory.push({ role: "user", text: userText });
     chatMessage = "";
     isAiTyping = true;
+    autoScrollChat = true; // Paksa scroll turun saat kita ngirim pesan
     m.redraw(); 
 
     const alamatServer = window.location.hostname === "localhost" ? "http://localhost:3000/api" : "/api";
@@ -67,6 +69,8 @@ const ConcertLayout = () => {
       chatHistory.push({ role: "ai", text: Settings.lang === "id" ? "Duh, koneksi ke otak AI gue lagi gangguan nih." : "Oops, my AI brain connection is down." });
     } finally {
       isAiTyping = false;
+      autoScrollChat = true; // Paksa scroll turun saat AI selesai membalas
+      m.redraw();
     }
   };
 
@@ -152,16 +156,13 @@ const ConcertLayout = () => {
       });
 
       const hasVideos = activeConcert && activeConcert.videos && activeConcert.videos.length > 0;
-      
       const isDark = Settings.theme === "dark";
       
       const bgRoot = isDark 
         ? "bg-gradient-to-b from-slate-900 via-[#0a0f1c] to-black text-slate-200" 
         : "bg-gradient-to-br from-slate-50 via-white to-slate-100 text-slate-800";
-      
       const textHeading = isDark ? "text-white drop-shadow-md" : "text-slate-900";
       const textMuted = isDark ? "text-slate-400" : "text-slate-500";
-      
       const bgCard = isDark 
         ? "bg-slate-800/40 backdrop-blur-sm border-slate-700/50 hover:bg-slate-800/70 hover:border-indigo-500/50 hover:shadow-[0_0_30px_rgba(99,102,241,0.2)]" 
         : "bg-white/80 backdrop-blur-sm border-slate-200 hover:bg-white hover:border-indigo-300 hover:shadow-xl";
@@ -200,7 +201,6 @@ const ConcertLayout = () => {
               currentId === "home" ? 
                 
                 m("div", { class: "flex flex-col gap-24 mt-12 pb-16 items-center text-center" },
-                  // HEADER HOME
                   m("div", { class: "max-w-3xl mx-auto flex flex-col items-center gap-6 relative" },
                     isDark ? m("div", { class: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" }) : null,
                     m("img", { src: "/temankonserlogo.png", alt: "Logo", class: "w-32 h-32 md:w-48 md:h-48 object-contain mx-auto drop-shadow-2xl mb-2 relative z-10" }),
@@ -213,7 +213,6 @@ const ConcertLayout = () => {
                     m("p", { class: `text-md ${isDark ? 'text-slate-500' : 'text-slate-500'}` }, t.hint)
                   ),
 
-                  // STATISTIK
                   m("div", { class: "w-full max-w-4xl mx-auto relative z-10" },
                     m("h2", { class: `text-2xl font-bold ${textHeading} mb-10 tracking-wide` }, t.highlight),
                     m("div", { class: "grid grid-cols-1 md:grid-cols-3 gap-6" },
@@ -246,13 +245,9 @@ const ConcertLayout = () => {
                 )
 
               : 
-                // HALAMAN EVENT KONSER (SEKARANG ADA THUMBNAIL BESAR)
                 (activeConcert ? 
                   m("div", { class: `${isDark ? 'bg-slate-900/60 backdrop-blur-md border-slate-700/50' : 'bg-white/80 backdrop-blur-md border-slate-200'} rounded-3xl border p-8 md:p-12 mb-10 text-center max-w-5xl mx-auto mt-4 shadow-2xl transition-colors` },
-                    
-                    // --- BLOK THUMBNAIL & JUDUL ---
                     m("div", { class: "flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 mb-8" },
-                      // Thumbnail Album/Event
                       m("div", { class: "relative group" },
                         m("div", { class: "absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200" }),
                         m("img", {
@@ -265,18 +260,12 @@ const ConcertLayout = () => {
                           } 
                         })
                       ),
-                      
-                      // Judul Event
                       m("div", { class: "flex flex-col md:text-left text-center" },
                         m("h1", { class: `text-3xl md:text-5xl font-extrabold mb-2 ${textHeading} tracking-tight` }, activeConcert.title),
-                        m("span", { class: "inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 w-max mx-auto md:mx-0" }, 
-                          "Ruang Memori"
-                        )
+                        m("span", { class: "inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 w-max mx-auto md:mx-0" }, "Ruang Memori")
                       )
                     ),
-
                     m("p", { class: `italic mb-12 text-lg ${textMuted} max-w-3xl mx-auto md:mx-0 md:text-left border-l-4 border-indigo-500 pl-4` }, `"${activeConcert.desc}"`),
-                    // --- AKHIR BLOK THUMBNAIL & JUDUL ---
                     
                     !isOpen ? 
                       m("button", {
@@ -286,7 +275,6 @@ const ConcertLayout = () => {
                     : 
                       m("div", { class: "mt-16 animate-[fadeIn_0.5s_ease-out_1]" },
                         m("div", { class: "grid grid-cols-1 lg:grid-cols-2 gap-12 items-start text-left" },
-                          
                           m("div", { class: "w-full" },
                             m("div", { class: `flex items-center gap-4 mb-6 border-b ${isDark ? 'border-slate-700/50' : 'border-slate-200'} pb-4` },
                               m("span", { class: "text-3xl" }, "📷"),
@@ -296,7 +284,6 @@ const ConcertLayout = () => {
                               m(PhotoGrid, { images: activeConcert.gallery })
                             )
                           ),
-
                           hasVideos ? 
                             m("div", { class: "w-full" },
                               m("div", { class: `flex items-center gap-4 mb-6 border-b ${isDark ? 'border-slate-700/50' : 'border-slate-200'} pb-4` },
@@ -304,10 +291,10 @@ const ConcertLayout = () => {
                                 m("h3", { class: `text-2xl font-bold ${textHeading}` }, t.videoArc)
                               ),
                               m("div", { class: `grid grid-cols-1 sm:grid-cols-2 gap-5 ${isDark ? 'bg-slate-950/50 border-slate-800/50' : 'bg-slate-50 border-slate-200'} p-5 rounded-3xl border shadow-inner` },
-                                (activeConcert.videos || []).map((vidUrl, index) => 
+                                (activeConcert.videos || []).map((vidUrl) => 
                                   m("div", { class: `w-full ${isDark ? 'bg-black' : 'bg-slate-900'} p-2.5 rounded-2xl shadow-xl border border-slate-800 animate-[fadeIn_0.5s_ease-out_1]` },
                                     vidUrl.includes("drive.google.com") ? 
-                                      m("iframe", { src: formatVideoEmbed(vidUrl), class: "w-full h-[250px] md:h-[350px] rounded-xl border-0", allowfullscreen: true, loading: "lazy", sandbox: "allow-scripts allow-same-origin allow-popups" })
+                                      m("iframe", { src: formatVideoEmbed(vidUrl), class: "w-full h-[250px] md:h-[350px] rounded-xl border-0", allowfullscreen: true, loading: "lazy" })
                                     : 
                                       m("video", { src: vidUrl, class: "w-full h-[250px] md:h-[350px] object-contain rounded-xl bg-black", controls: true })
                                   )
@@ -328,14 +315,26 @@ const ConcertLayout = () => {
             )
         ),
 
-        // --- KOMPONEN AI CHATBOT ---
+        // --- KOMPONEN AI CHATBOT (DENGAN SCROLL PINTAR) ---
         m("div", { class: "fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans" },
           isChatOpen ? m("div", { class: `${isDark ? 'bg-slate-900/95 backdrop-blur-xl border-slate-700/50' : 'bg-white/95 backdrop-blur-xl border-slate-200'} border rounded-3xl w-[340px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-4 overflow-hidden flex flex-col animate-[fadeIn_0.2s_ease-out_1]` },
             m("div", { class: "bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex justify-between items-center text-white" },
               m("span", { class: "font-bold flex items-center gap-2 text-md" }, "🤖 Teman Konser AI"),
               m("button", { class: "hover:text-indigo-200 font-bold text-lg", onclick: () => isChatOpen = false }, "✕")
             ),
-            m("div", { class: `p-5 h-80 overflow-y-auto flex flex-col gap-4 ${isDark ? 'bg-transparent' : 'bg-slate-50/50'} text-sm`, id: "chat-box", onupdate: (vnode) => vnode.dom.scrollTop = vnode.dom.scrollHeight },
+            
+            // BAGIAN INI YANG KITA PERBAIKI
+            m("div", { 
+              class: `p-5 h-80 overflow-y-auto flex flex-col gap-4 ${isDark ? 'bg-transparent' : 'bg-slate-50/50'} text-sm`, 
+              id: "chat-box", 
+              oncreate: (vnode) => { vnode.dom.scrollTop = vnode.dom.scrollHeight; },
+              onupdate: (vnode) => { 
+                if (autoScrollChat) {
+                  vnode.dom.scrollTop = vnode.dom.scrollHeight; 
+                  autoScrollChat = false; // Matikan tuasnya setelah berhasil turun
+                }
+              }
+            },
               chatHistory.map(chat => 
                 m("div", { class: `p-3.5 max-w-[85%] rounded-2xl shadow-sm leading-relaxed ${chat.role === 'ai' ? (isDark ? 'bg-slate-800 text-slate-200' : 'bg-white border border-slate-100 text-slate-800') + ' self-start rounded-tl-none' : 'bg-indigo-500 text-white self-end rounded-tr-none'}` }, 
                   chat.text
@@ -343,6 +342,7 @@ const ConcertLayout = () => {
               ),
               isAiTyping ? m("div", { class: `${textMuted} italic text-xs ml-2 flex gap-1` }, m("span", {class: "animate-bounce"}, "•"), m("span", {class: "animate-bounce delay-75"}, "•"), m("span", {class: "animate-bounce delay-150"}, "•")) : null
             ),
+            
             m("form", { class: `flex p-4 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'} border-t`, onsubmit: sendChatMessage },
               m("input", { class: `flex-grow ${isDark ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-100 border-slate-200 text-slate-900'} border rounded-xl p-3 outline-none focus:border-indigo-500 text-sm transition-colors`, placeholder: Settings.lang === "id" ? "Tanya apa aja..." : "Ask me anything...", value: chatMessage, oninput: e => chatMessage = e.target.value }),
               m("button", { type: "submit", class: "ml-3 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 rounded-xl font-bold text-sm transition-all" }, "➤")
