@@ -203,7 +203,7 @@ const ConcertLayout = () => {
                 m("div", { class: "flex flex-col gap-24 mt-12 pb-16 items-center text-center" },
                   m("div", { class: "max-w-3xl mx-auto flex flex-col items-center gap-6 relative" },
                     isDark ? m("div", { class: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" }) : null,
-                    m("img", { src: "/temankonserlogo.png", alt: "Logo", class: "w-32 h-32 md:w-48 md:h-48 object-contain mx-auto drop-shadow-2xl mb-2 relative z-10" }),
+                    m("img", { src: "/IMG_4241.png", alt: "Logo", class: "w-32 h-32 md:w-48 md:h-48 object-contain mx-auto drop-shadow-2xl mb-2 relative z-10" }),
                     m("h1", { class: `text-4xl md:text-5xl font-bold ${textHeading} tracking-tight min-h-[3rem] md:min-h-[4rem] flex items-center justify-center relative z-10` }, 
                       currentText,
                       m("span", { class: "text-indigo-500 animate-pulse font-light ml-1" }, "|") 
