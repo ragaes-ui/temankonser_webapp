@@ -85,7 +85,7 @@ const Navbar = () => {
             
             // LOGO UTAMA NAVBAR
             m(m.route.Link, { href: "/home", class: "flex items-center gap-3 hover:opacity-80 transition-opacity" },
-              m("img", { src: "/temankonserlogo.png", alt: "Logo Teman Konser", class: "w-8 h-8 md:w-10 md:h-10 object-contain rounded-full drop-shadow-md" }),
+              m("img", { src: "/IMG_4241.png", alt: "Logo Teman Konser", class: "w-8 h-8 md:w-10 md:h-10 object-contain rounded-full drop-shadow-md" }),
               m("div", { class: `font-bold text-lg md:text-xl tracking-wide ${textNav}` }, "TemanKonser")
             ),
             
